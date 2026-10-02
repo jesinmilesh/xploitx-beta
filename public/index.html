@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en" class="loader-locked">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPLOITX 2.0 BETA | 24-Hour Cybersecurity CTF</title>
+    <meta name="description"
+        content="XPLOITX 2.0 BETA - 24-Hour Cybersecurity Capture The Flag Competition organized by Department of Cyber Security, Prathyusha Engineering College on 8th - 9th October 2026.">
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <link rel="stylesheet" href="styles.css?v=2.6">
+    <link rel="icon" type="image/jpeg" href="Favicon.jpeg">
+    <link rel="apple-touch-icon" href="Favicon.jpeg">
+</head>
+
+<body class="loader-locked">
+
+    <div id="loader-overlay"></div>
+
+
+    <a href="register.html" class="register-floating-btn" id="floating-reg-btn" title="Enlist for XPLOITX 2.0 BETA">
+        <span class="reg-btn-offer">🔥 EARLY BIRD: ₹150</span>
+        <span class="reg-btn-status"><span class="pulse-dot"></span> REGISTRATION OPEN</span>
+        <span class="reg-btn-label">[ REGISTER NOW ] <i class="fas fa-arrow-right"></i></span>
+    </a>
+
+
+    <canvas id="particles-bg"></canvas>
+    <div class="cyber-grid-overlay"></div>
+
+
+    <header class="college-header-wrapper">
+        <div class="college-info-block">
+            <img src="PEC Logo.png" alt="Prathyusha Engineering College Logo" class="pec-logo-img">
+            <div class="college-text-details">
+                <h1 class="header-college-title">PRATHYUSHA ENGINEERING COLLEGE</h1>
+                <div class="header-college-subtitle">(AN AUTONOMOUS INSTITUTION)</div>
+                <div class="header-accreditation-text">
+                    Approved by AICTE & Affiliated to Anna University, NAAC "A" Grade Accredited Institution<br>
+                    National Board of Accreditation (NBA) Accredited Programmes
+                </div>
+            </div>
+        </div>
+
+
+        <div class="logo-marquee-container">
+            <div class="logo-marquee-content">
+                <img src="tag.png" alt="Accreditation Logos">
+                <img src="tag.png" alt="Accreditation Logos">
+                <img src="tag.png" alt="Accreditation Logos">
+                <img src="tag.png" alt="Accreditation Logos">
+            </div>
+        </div>
+
+
+        <div class="news-marquee-container">
+            <div class="news-marquee-content">
+                <a href="register.html">
+                    <span>🔥 EARLY BIRD OFFER EXTENDED: ₹150 / HEAD • 📢 REGISTRATION DEADLINE EXTENDED TO 04 OCTOBER 2026 • XPLOITX 2.0 BETA • 24-HOUR OFFLINE
+                        CYBERSECURITY CTF • 08 - 09 OCTOBER 2026 • PRATHYUSHA ENGINEERING COLLEGE • REGISTER NOW •
+                    </span>
+                    <span>🔥 EARLY BIRD OFFER EXTENDED: ₹150 / HEAD • 📢 REGISTRATION DEADLINE EXTENDED TO 04 OCTOBER 2026 • XPLOITX 2.0 BETA • 24-HOUR OFFLINE
+                        CYBERSECURITY CTF • 08 - 09 OCTOBER 2026 • PRATHYUSHA ENGINEERING COLLEGE • REGISTER NOW •
+                    </span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <ul class="nav-links" id="nav-links-menu">
+                <li><a href="index.html" class="nav-link active"><i class="fas fa-home"></i> HOME</a></li>
+                <li><a href="about.html" class="nav-link"><i class="fas fa-info-circle"></i> ABOUT</a></li>
+                <li><a href="rules.html" class="nav-link"><i class="fas fa-gavel"></i> RULES</a></li>
+                <li><a href="prizes.html" class="nav-link"><i class="fas fa-trophy"></i> PRIZES</a></li>
+                <li><a href="register.html" class="nav-link"><i class="fas fa-user-plus"></i> REGISTER</a></li>
+            </ul>
+
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation menu">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- DEPARTMENT OF CYBER SECURITY BANNER -->
+    <div class="department-bar">
+        <div class="container department-bar-inner">
+            <span class="dept-accent-line left"></span>
+            <div class="department-badge">
+                <i class="fas fa-shield-alt dept-shield-icon"></i>
+                <span class="dept-title">DEPARTMENT OF CYBER SECURITY</span>
+            </div>
+            <span class="dept-accent-line right"></span>
+        </div>
+    </div>
+
+    <section class="hero-section" id="home">
+        <div class="container hero-content">
+
+            <div class="hero-logo-wrapper">
+                <img src="xploitx_logo.png" alt="XPLOITX 2.0 BETA Logo" class="hero-logo-img">
+            </div>
+
+            <div class="hero-subtitle-format">
+                24-HOUR CYBERSECURITY CAPTURE THE FLAG
+            </div>
+
+            <div style="margin-top: 15px; margin-bottom: 20px;">
+                <span
+                    style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 255, 102, 0.12); border: 1px solid var(--doom-green); color: var(--doom-green); font-family: var(--font-mono); font-weight: bold; padding: 6px 18px; border-radius: 20px; font-size: 0.9rem; letter-spacing: 1px; box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);">
+                    <i class="fas fa-fire text-gold" style="color: #ffd700;"></i> EARLY BIRD OFFER IS LIVE: ₹150 / HEAD
+                </span>
+            </div>
+
+            <div class="hero-tagline">
+                "ENTER THE DIGITAL BATTLEFIELD."
+            </div>
+
+            <div class="hero-supporting-text">
+                24 hours. One battlefield. Hundreds of challenges. One leaderboard.
+            </div>
+
+            <p class="hero-description">
+                XPLOITX 2.0 BETA is a hands-on cybersecurity Capture The Flag competition designed to challenge
+                participants across multiple domains of offensive security, analysis, exploitation and problem solving.
+            </p>
+
+            <div class="hero-meta-bar">
+                <div class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>08 - 09 OCTOBER 2026</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-hourglass-half text-gold"></i>
+                    <span class="text-gold">REGISTRATION DEADLINE: 04 OCT 2026</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-stopwatch"></i>
+                    <span>24 HOURS CTF</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>PRATHYUSHA ENGINEERING COLLEGE</span>
+                </div>
+            </div>
+
+            <div class="hero-actions">
+                <a href="register.html" class="btn btn-primary">[ REGISTER NOW ]</a>
+                <a href="about.html" class="btn btn-secondary">[ EXPLORE MISSION ]</a>
+            </div>
+        </div>
+    </section>
+    <section class="countdown-section" id="countdown">
+        <div class="container">
+            <div class="countdown-wrapper hud-panel">
+                <div class="countdown-heading">
+                    <i class="fas fa-satellite-dish"></i> THE BATTLE BEGINS IN
+                </div>
+                <div class="countdown-grid">
+                    <div class="countdown-box">
+                        <span class="countdown-val" id="cd-days">00</span>
+                        <span class="countdown-label">DAYS</span>
+                    </div>
+                    <div class="countdown-divider">:</div>
+                    <div class="countdown-box">
+                        <span class="countdown-val" id="cd-hours">00</span>
+                        <span class="countdown-label">HOURS</span>
+                    </div>
+                    <div class="countdown-divider">:</div>
+                    <div class="countdown-box">
+                        <span class="countdown-val" id="cd-minutes">00</span>
+                        <span class="countdown-label">MINUTES</span>
+                    </div>
+                    <div class="countdown-divider">:</div>
+                    <div class="countdown-box">
+                        <span class="countdown-val" id="cd-seconds">00</span>
+                        <span class="countdown-label">SECONDS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="about">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ MISSION BRIEFING ]</div>
+                <h2 class="section-title">THE BETA MISSION</h2>
+                <p class="section-subtitle">A high-stakes digital proving ground designed to test practical
+                    cybersecurity capabilities.</p>
+            </div>
+
+            <div class="mission-grid">
+                <div class="mission-text-card hud-panel">
+                    <p class="mission-paragraph">
+                        The Department of Cyber Security presents <strong>XPLOITX 2.0 BETA</strong>, a 24-hour
+                        Cybersecurity Capture The Flag competition for students.
+                    </p>
+                    <p class="mission-paragraph">
+                        The beta edition is designed as a preliminary version of XPLOITX 2.0, building the foundation
+                        for a larger-scale edition planned for 2027.
+                    </p>
+                    <p class="mission-paragraph">
+                        The competition focuses on practical cybersecurity skills, technical problem solving and
+                        hands-on challenge solving.
+                    </p>
+
+                    <div class="mission-vision-box">
+                        <i class="fas fa-shield-alt text-green"></i> <strong>2027 SCALE ROADMAP:</strong> This beta
+                        edition calibrates the core infrastructure, difficulty curve, and scoring algorithms for next
+                        year's full international deployment.
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-card hud-panel">
+                        <div class="stat-number text-green">24</div>
+                        <div class="stat-info">
+                            <h4>HOURS</h4>
+                            <p>Continuous capture the flag warfare</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card hud-panel" style="border-left-color: var(--incursion-purple);">
+                        <div class="stat-number text-purple">CTF</div>
+                        <div class="stat-info">
+                            <h4>COMPETITION</h4>
+                            <p>Hands-on offensive security & defense</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card hud-panel" style="border-left-color: var(--doom-gold);">
+                        <div class="stat-number text-gold">2026</div>
+                        <div class="stat-info">
+                            <h4>BETA EDITION</h4>
+                            <p>Preliminary launch for 2027 expansion</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- A GLIMPSE INTO OUR LEGACY - HORIZONTAL INFINITE LOOP -->
+    <section id="legacy" class="legacy-gallery-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ ARCHIVED CHRONICLES ]</div>
+                <h2 class="section-title">A GLIMPSE INTO OUR LEGACY</h2>
+                <p class="section-subtitle">A visual chronicle of groundbreaking cyber challenges, intense hackathon warfare, and triumph from our previous editions at Prathyusha Engineering College.</p>
+            </div>
+        </div>
+
+        <div class="legacy-marquee-wrapper" id="legacy-marquee-wrapper">
+            <div class="legacy-marquee-track">
+                <!-- Group 1 -->
+                <div class="legacy-marquee-group">
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0741.JPG" alt="Welcome to XploitX" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-shield-alt"></i> XPLOITX ARCHIVE</span>
+                            <h4 class="legacy-caption">Welcome to XploitX</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0770.JPG" alt="Dignitaries & Chief Guests" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-certificate"></i> INAUGURATION</span>
+                            <h4 class="legacy-caption">Dignitaries & Chief Guests</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0788.JPG" alt="Keynote Address" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-bullhorn"></i> MISSION BRIEFING</span>
+                            <h4 class="legacy-caption">Keynote Address</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0793.JPG" alt="Lighting the Sacred Lamp" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-fire"></i> COMMENCEMENT</span>
+                            <h4 class="legacy-caption">Lighting the Sacred Lamp</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0798.JPG" alt="Guest Felicitation" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-award"></i> HONORS</span>
+                            <h4 class="legacy-caption">Guest Felicitation</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0818.JPG" alt="Memento Presentation" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-medal"></i> RECOGNITION</span>
+                            <h4 class="legacy-caption">Memento Presentation</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0824.JPG" alt="Department Leadership" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-chalkboard-teacher"></i> LEADERSHIP</span>
+                            <h4 class="legacy-caption">Department Leadership</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0839.JPG" alt="CTF Arena Ribbon Cutting" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-cut"></i> GRAND OPENING</span>
+                            <h4 class="legacy-caption">CTF Arena Ribbon Cutting</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0862.JPG" alt="Live Cyber Warfare" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-laptop-code"></i> CTF ARENA</span>
+                            <h4 class="legacy-caption">Live Cyber Warfare</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0865.JPG" alt="24-Hour Problem Solving" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-network-wired"></i> HACK SPRINT</span>
+                            <h4 class="legacy-caption">24-Hour Problem Solving</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0981.JPG" alt="Mentor & Jury Review" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-user-check"></i> EVALUATION</span>
+                            <h4 class="legacy-caption">Mentor & Jury Review</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1005.JPG" alt="Intense Late-Night Coding" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-users"></i> TEAM SYNERGY</span>
+                            <h4 class="legacy-caption">Intense Late-Night Coding</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1034.JPG" alt="Grand Valedictory Ceremony" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-trophy"></i> VALEDICTORY</span>
+                            <h4 class="legacy-caption">Grand Valedictory Ceremony</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1038.JPG" alt="Auditorium Group Photograph" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-camera"></i> THE LEGACY</span>
+                            <h4 class="legacy-caption">Auditorium Group Photograph</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1045.JPG" alt="Victorious Champions" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-crown"></i> Coordinators</span>
+                            <h4 class="legacy-caption"> The Minds Behind the Mission</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 2 (Identical duplicate for seamless continuous loop) -->
+                <div class="legacy-marquee-group" aria-hidden="true">
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0741.JPG" alt="Welcome to XploitX" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-shield-alt"></i> XPLOITX ARCHIVE</span>
+                            <h4 class="legacy-caption">Welcome to XploitX</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0770.JPG" alt="Dignitaries & Chief Guests" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-certificate"></i> INAUGURATION</span>
+                            <h4 class="legacy-caption">Dignitaries & Chief Guests</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0788.JPG" alt="Keynote Address" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-bullhorn"></i> MISSION BRIEFING</span>
+                            <h4 class="legacy-caption">Keynote Address</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0793.JPG" alt="Lighting the Sacred Lamp" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-fire"></i> COMMENCEMENT</span>
+                            <h4 class="legacy-caption">Lighting the Sacred Lamp</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0798.JPG" alt="Guest Felicitation" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-award"></i> HONORS</span>
+                            <h4 class="legacy-caption">Guest Felicitation</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0818.JPG" alt="Memento Presentation" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-medal"></i> RECOGNITION</span>
+                            <h4 class="legacy-caption">Memento Presentation</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0824.JPG" alt="Department Leadership" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-chalkboard-teacher"></i> LEADERSHIP</span>
+                            <h4 class="legacy-caption">Department Leadership</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0839.JPG" alt="CTF Arena Ribbon Cutting" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-cut"></i> GRAND OPENING</span>
+                            <h4 class="legacy-caption">CTF Arena Ribbon Cutting</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0862.JPG" alt="Live Cyber Warfare" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-laptop-code"></i> CTF ARENA</span>
+                            <h4 class="legacy-caption">Live Cyber Warfare</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0865.JPG" alt="24-Hour Problem Solving" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-network-wired"></i> HACK SPRINT</span>
+                            <h4 class="legacy-caption">24-Hour Problem Solving</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A0981.JPG" alt="Mentor & Jury Review" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-user-check"></i> EVALUATION</span>
+                            <h4 class="legacy-caption">Mentor & Jury Review</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1005.JPG" alt="Intense Late-Night Coding" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-users"></i> TEAM SYNERGY</span>
+                            <h4 class="legacy-caption">Intense Late-Night Coding</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1034.JPG" alt="Grand Valedictory Ceremony" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-trophy"></i> VALEDICTORY</span>
+                            <h4 class="legacy-caption">Grand Valedictory Ceremony</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1038.JPG" alt="Auditorium Group Photograph" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-camera"></i> THE LEGACY</span>
+                            <h4 class="legacy-caption">Auditorium Group Photograph</h4>
+                        </div>
+                    </div>
+                    <div class="legacy-card">
+                        <img src="gallery/0D4A1045.JPG" alt="Victorious Champions" loading="lazy">
+                        <div class="legacy-card-overlay">
+                            <span class="legacy-badge"><i class="fas fa-crown"></i> CHAMPIONS</span>
+                            <h4 class="legacy-caption">Victorious Champions</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-to-play">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ BATTLEGROUND PROTOCOL ]</div>
+                <h2 class="section-title">HOW TO PLAY</h2>
+                <p class="section-subtitle">Six phases to navigate from enlistment to the top of the leaderboard.</p>
+            </div>
+
+            <div class="timeline-container">
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 01</div>
+                    <div class="step-icon-wrap"><i class="fas fa-user-plus"></i></div>
+                    <h3 class="step-title">REGISTER</h3>
+                    <p class="step-desc">Participants register for XPLOITX 2.0 BETA and form strike teams.</p>
+                </div>
+
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 02</div>
+                    <div class="step-icon-wrap"><i class="fas fa-key"></i></div>
+                    <h3 class="step-title">JOIN THE CTF</h3>
+                    <p class="step-desc">Participants receive access to the competition platform.</p>
+                </div>
+
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 03</div>
+                    <div class="step-icon-wrap"><i class="fas fa-terminal"></i></div>
+                    <h3 class="step-title">SOLVE</h3>
+                    <p class="step-desc">Identify vulnerabilities, analyze evidence and solve cybersecurity challenges.
+                    </p>
+                </div>
+
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 04</div>
+                    <div class="step-icon-wrap"><i class="fas fa-flag"></i></div>
+                    <h3 class="step-title">CAPTURE</h3>
+                    <p class="step-desc">Submit valid flags in correct format (<code>XploitXβ{flag}</code>) to earn dynamic points.</p>
+                </div>
+
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 05</div>
+                    <div class="step-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="step-title">CLIMB</h3>
+                    <p class="step-desc">Compete on the leaderboard throughout the 24-hour competition.</p>
+                </div>
+
+
+                <div class="timeline-step-card hud-panel">
+                    <div class="step-number">STEP 06</div>
+                    <div class="step-icon-wrap"><i class="fas fa-trophy"></i></div>
+                    <h3 class="step-title">CONQUER</h3>
+                    <p class="step-desc">Finish among the highest-scoring teams and claim victory.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="prizes-section" id="prizes">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ SOVEREIGN TREASURY ]</div>
+                <h2 class="section-title">BATTLEGROUND BOUNTIES & PRIZES</h2>
+                <p class="section-subtitle">Supreme glory, cash bounties, and elite rewards await the top cybersecurity operatives.</p>
+            </div>
+
+            <div class="grand-prize-container">
+                <div class="grand-prize-card hud-panel">
+                    <div class="grand-prize-badge">
+                        <i class="fas fa-crown"></i> OFFICIAL BATTLEWORLD TREASURY POOL
+                    </div>
+                    <div class="grand-prize-icon-wrap">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="grand-prize-title">CUMULATIVE PRIZE POOL</h3>
+                    <div class="grand-prize-amount">WORTH UP TO ₹1,00,000</div>
+                    <p class="grand-prize-desc">
+                        Grand prize pool combining sovereign cash rewards, premium cybersecurity tooling & certification vouchers, official institution trophies, and national distinction honors for top-scoring teams.
+                    </p>
+
+                    <div class="grand-prize-perks-grid">
+                        <div class="grand-prize-perk-item">
+                            <span class="grand-prize-perk-icon text-gold"><i class="fas fa-coins"></i></span>
+                            <h4 class="grand-prize-perk-title">CASH BOUNTIES</h4>
+                            <p class="grand-prize-perk-desc">Direct cash prizes awarded to the victorious top-performing strike teams.</p>
+                        </div>
+                        <div class="grand-prize-perk-item">
+                            <span class="grand-prize-perk-icon text-green"><i class="fas fa-ticket-alt"></i></span>
+                            <h4 class="grand-prize-perk-title">TECH VOUCHERS</h4>
+                            <p class="grand-prize-perk-desc">Premium cybersecurity tool access, course vouchers, and platform perks.</p>
+                        </div>
+                        <div class="grand-prize-perk-item">
+                            <span class="grand-prize-perk-icon text-cyan"><i class="fas fa-trophy"></i></span>
+                            <h4 class="grand-prize-perk-title">OFFICIAL TROPHIES</h4>
+                            <p class="grand-prize-perk-desc">Prestigious institution championship trophies and podium mementos.</p>
+                        </div>
+                        <div class="grand-prize-perk-item">
+                            <span class="grand-prize-perk-icon text-magenta"><i class="fas fa-certificate"></i></span>
+                            <h4 class="grand-prize-perk-title">MERIT HONORS</h4>
+                            <p class="grand-prize-perk-desc">Official certificates of distinction and exclusive Battleworld swag.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prizes-cta-wrap">
+                <a href="prizes.html" class="btn btn-secondary"><i class="fas fa-external-link-alt"></i> [ VIEW FULL
+                    PRIZE & SPONSORS DOSSIER ]</a>
+            </div>
+        </div>
+    </section>
+    <section class="mou-section" id="partners">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ ALLIANCES & COLLABORATIONS ]</div>
+                <h2 class="section-title">OUR MoU PARTNERS</h2>
+                <p class="section-subtitle">Strategic cybersecurity industry alliances empowering XPLOITX 2.0 BETA.</p>
+            </div>
+
+
+            <div class="joint-org-wrapper">
+                <div class="org-unit-card">
+                    <img src="Ethical Hacking Logo.jpeg" alt="Ethical Hacking Club" class="joint-logo-img">
+                    <div class="joint-text-info">
+                        DEPARTMENT OF CYBER SECURITY<br>
+                        <span class="text-green">(ETHICAL HACKING CLUB)</span>
+                    </div>
+                </div>
+
+                <div class="joint-separator">&</div>
+
+                <div class="org-unit-card">
+                    <img src="Hackshield.jpeg" alt="Hackshield Student Association" class="joint-logo-img">
+                    <div class="joint-text-info">
+                        HACKSHIELD<br>
+                        <span class="text-gold">(STUDENT ASSOCIATION)</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="partner-category-block">
+                <h3 class="partner-category-title"><i class="fas fa-crown text-gold"></i> OUR SPONSORS</h3>
+                <div class="partner-cards-grid">
+                    <a href="https://dragotool.shop/" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Dragoz.jpeg" alt="DragoZ" class="partner-logo-img">
+                        </div>
+                    </a>
+                    <div class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="CyberDefenders.png" alt="Cyber Defenders" class="partner-logo-img">
+                        </div>
+                    </div>
+                    <div class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="ThunderCipher.png" alt="ThunderCipher" class="partner-logo-img">
+                        </div>
+                    </div>
+                    <div class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="KnightSquad.png" alt="Knight Squad Academy" class="partner-logo-img">
+                        </div>
+                    </div>
+                    <a href="https://k7academy.com/" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="K7.png" alt="K7 Academy" class="partner-logo-img">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="partner-category-block" style="margin-top: 40px;">
+                <h3 class="partner-category-title"><i class="fas fa-handshake"></i> INDUSTRY MoU PARTNERS</h3>
+                <div class="partner-cards-grid">
+                    <a href="https://tanmay.pro/" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="cyber sanskar.jpg" alt="Cyber Sanskar" class="partner-logo-img">
+                        </div>
+                    </a>
+
+                    <a href="https://cyberheals.com/" target="_blank" rel="noopener noreferrer"
+                        class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="cyber heals.jpg" alt="Cyber Heals" class="partner-logo-img">
+                        </div>
+                    </a>
+
+                    <a href="https://junisys.in/" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Junisys.png" alt="Junisys" class="partner-logo-img">
+                        </div>
+                    </a>
+
+                    <a href="https://rocheston.com/" target="_blank" rel="noopener noreferrer"
+                        class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Rocheston.png" alt="Rocheston" class="partner-logo-img">
+                        </div>
+                    </a>
+
+                    <a href="https://secureworldz.pro/" target="_blank" rel="noopener noreferrer"
+                        class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Secure Worldz.jpg" alt="Secure Worldz" class="partner-logo-img">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+
+            <div class="partner-category-block" style="margin-top: 40px;">
+                <h3 class="partner-category-title"><i class="fas fa-globe"></i> DIGITAL PARTNERS</h3>
+                <div class="partner-cards-grid">
+                    <a href="https://eventopia.in/" target="_blank" rel="noopener noreferrer"
+                        class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Eventopia.jpeg" alt="Eventopia" class="partner-logo-img">
+                        </div>
+                    </a>
+
+                    <a href="https://www.knowafest.com/" target="_blank" rel="noopener noreferrer"
+                        class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Knowafest.png" alt="Knowafest" class="partner-logo-img">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="partner-category-block" style="margin-top: 40px;">
+                <h3 class="partner-category-title"><i class="fas fa-users"></i> COMMUNITY PARTNERS</h3>
+                <div class="partner-cards-grid">
+                    <a href="https://linktr.ee/omegaconsortium" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="Omega.jpeg" alt="Omega Consortium" class="partner-logo-img">
+                        </div>
+                    </a>
+                    <a href="https://whitehat-hub.vercel.app/partners" target="_blank" rel="noopener noreferrer" class="partner-card-link">
+                        <div class="partner-logo-box">
+                            <img src="White-Hub.jpeg" alt="White Hat Hub" class="partner-logo-img">
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section id="rules">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ OPERATIONAL DIRECTIVES ]</div>
+                <h2 class="section-title">CTF RULEBOOK</h2>
+                <p class="section-subtitle">Strict compliance with fair-play directives is mandatory for all
+                    competitors.</p>
+            </div>
+
+            <div class="accordion-group">
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ TEAM RULES</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Participants may compete individually or in teams of up to 4 members [Placeholder].
+                                </li>
+                                <li>Cross-institutional teams are permitted.</li>
+                                <li>Team members cannot be swapped after the 24-hour competition begins.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ FAIR PLAY</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Sharing flags, writeups, or solutions between opposing teams during the event is
+                                    strictly prohibited.</li>
+                                <li>Do not solicit outside assistance during active challenge periods.</li>
+                                <li>Compete with technical honor and integrity.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ FLAG SUBMISSION</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>All flags follow the standard format: <code>XploitXβ{flag}</code>
+                                    unless specified otherwise.</li>
+                                <li>Flags are case-sensitive and must be submitted through the official portal.</li>
+                                <li>Brute-forcing the flag submission box is disallowed and will trigger automated rate
+                                    limits.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ SCORING</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Scoring operates on dynamic challenge point values based on total number of solves.
+                                </li>
+                                <li>Ties are resolved based on the timestamp of the last valid flag submission.</li>
+                                <li>The scoreboard will freeze during the final stretch before closing ceremonies.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ CHALLENGE INTEGRITY</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Do not attack, alter, or sabotage challenges to prevent other participants from
+                                    solving them.</li>
+                                <li>Do not leave persistence or backdoors on challenge instances.</li>
+                                <li>Report any critical infrastructure bugs to the admin Discord/Telegram.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ SERVER USAGE</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Attacking the CTF hosting infrastructure, score server, or organizer networks is
+                                    strictly prohibited.</li>
+                                <li>Denial of Service (DoS/DDoS) attacks against any target will result in immediate
+                                    disqualification.</li>
+                                <li>Limit automated scanners to reasonable thread limits to prevent service degradation.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ DISQUALIFICATION</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Any team caught cheating, flag-sharing, or exploiting scoreboard bugs will be
+                                    disqualified instantly.</li>
+                                <li>Organizers reserve the right to audit solution writeups from top-ranked teams prior
+                                    to prize disbursement.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">◈ PARTICIPANT CONDUCT</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Maintain professional, respectful communication with fellow competitors, mentors,
+                                    and staff.</li>
+                                <li>Harassment or disruptive behavior will not be tolerated.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="faq">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ FREQUENTLY ASKED QUERIES ]</div>
+                <h2 class="section-title">FAQ</h2>
+                <p class="section-subtitle">Common questions regarding participation, structure, and technical
+                    requirements.</p>
+            </div>
+
+            <div class="accordion-group">
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">What is XPLOITX 2.0 BETA?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>XPLOITX 2.0 BETA is a premier 24-hour cybersecurity Capture The Flag competition
+                                organized by the Department of Cyber Security at Prathyusha Engineering College. It
+                                serves as a preliminary beta edition paving the way for the larger-scale international
+                                edition in 2027.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">What is a CTF?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>A Capture The Flag (CTF) is an offensive cybersecurity competition where participants
+                                solve technical puzzles across domains like web exploitation, cryptography, reverse
+                                engineering, and forensics to discover hidden secret strings known as "flags".</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">Who can participate?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>Undergraduate and postgraduate students, cybersecurity enthusiasts, and security
+                                researchers from recognized institutions are welcome to compete.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">How long is the competition?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>The competition runs for exactly <strong>24 hours</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">When is XPLOITX 2.0 BETA?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>The event is scheduled for <strong>08 - 09 OCTOBER 2026</strong> (8th October 10:00 AM to
+                                9th October 10:00 AM). The registration deadline has been extended to <strong>04 October 2026</strong>.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">How does scoring work?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>Challenges award points upon submitting a valid flag. The CTF uses a dynamic scoring
+                                model where point values scale based on the number of teams that solve a challenge.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">Can participants compete as teams?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>Yes. Participants can compete in teams (up to 4 members [Placeholder]). Cross-college
+                                teams are permitted.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">What cybersecurity skills are useful?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>Familiarity with Linux command line, Python/scripting, web application security (OWASP
+                                Top 10), basic assembly/disassembly (Ghidra, IDA), Wireshark packet analysis, and
+                                cryptanalysis tools will be valuable.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">How are flags submitted?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>Flags are submitted directly into the input field on the official CTF platform following the standard format <code>XploitXβ{flag}</code>. Once
+                                validated, your team's score updates immediately on the live scoreboard.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">Where will the competition platform be provided?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>All registered teams will receive secure platform login credentials and orientation
+                                instructions via email prior to the start of the competition.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">What is the registration fee?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>The registration fee is <strong>₹150 per head</strong> (Early Bird Offer). Teams can
+                                complete their registration securely through the online registration portal.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="accordion-item hud-panel">
+                    <button class="accordion-header">
+                        <span class="accordion-title">Is the event Online or Offline?</span>
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </button>
+                    <div class="accordion-body">
+                        <div class="accordion-content">
+                            <p>XPLOITX 2.0 BETA is an <strong>OFFLINE (In-Person)</strong> 24-Hour continuous
+                                cybersecurity hackathon and CTF competition hosted physically on-campus at
+                                <strong>Prathyusha Engineering College</strong>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="organizing-nodes-section" id="coordinators">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">[ ARCHITECTS OF THE SIMULATION ]</div>
+                <h2 class="section-title">ORGANIZING NODES</h2>
+                <p class="section-subtitle">Connect directly with student command leads and faculty coordinators.</p>
+            </div>
+
+
+            <div class="organizers-table-grid">
+
+                <div class="organizer-section-block">
+                    <h3 class="organizer-category-title"><i class="fas fa-id-card-alt"></i> STAFF COORDINATORS</h3>
+
+                    <div class="organizer-vertical-list">
+
+                        <div class="organizer-person-box hod-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Anithalakshmi Mam.jpeg" alt="Mrs. Anithalakshmi"
+                                        class="organizer-person-avatar-img" style="border-color: var(--doom-gold);">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Anithalakshmi</div>
+                                    <div class="organizer-person-role">Head of Department (HOD)</div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Devi Mam.jpeg" alt="Mrs. Devi" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Devi</div>
+                                    <div class="organizer-person-role">Staff Coordinator</div>
+                                </div>
+                            </div>
+                            <a href="tel:+919940592672" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 99405 92672
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Ramya Mam.jpeg" alt="Mrs. Ramya" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Ramya</div>
+                                    <div class="organizer-person-role">Assistant Professor</div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Rama Mam.jpeg" alt="Mrs. Rama Mathrasi"
+                                        class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Rama Mathrasi</div>
+                                    <div class="organizer-person-role">Assistant Professor</div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Aswini Mam.jpeg" alt="Mrs. Aswini" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Aswini</div>
+                                    <div class="organizer-person-role">Assistant Professor</div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Kalai.jpeg" alt="Mr. Kalaimani" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mr. Kalaimani</div>
+                                    <div class="organizer-person-role">Assistant Professor</div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Keerthana.jpeg" alt="Mrs. Keerthana" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Mrs. Keerthana</div>
+                                    <div class="organizer-person-role">Assistant Professor</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="organizer-section-block">
+                    <h3 class="organizer-category-title"><i class="fas fa-user-shield"></i> STUDENT COORDINATORS</h3>
+
+                    <div class="organizer-vertical-list">
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Ashish(1st).jpeg" alt="N Ashish" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">N Ashish</div>
+                                    <div class="organizer-person-role">Overall Coordinator</div>
+                                </div>
+                            </div>
+                            <a href="tel:+918122079494" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 81220 79494
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Madhu(2nd).jpeg" alt="Madhumitha Narayanan"
+                                        class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Madhumitha Narayanan</div>
+                                    <div class="organizer-person-role">Overall Coordinator</div>
+                                </div>
+                            </div>
+                            <a href="tel:+917305456171" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 73054 56171
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Amuthini.jpeg" alt="Amuthini K" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Amuthini K</div>
+                                    <div class="organizer-person-role">Overall CTF Tech Head</div>
+                                </div>
+                            </div>
+                            <a href="tel:+916383898745" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 63838 98745
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Nirajan.jpeg" alt="Niranjan M" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Niranjan M</div>
+                                    <div class="organizer-person-role">CTF Head</div>
+                                </div>
+                            </div>
+                            <a href="tel:+918667365915" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 86673 65915
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Jesin Milesh.png" alt="M Jesin Milesh"
+                                        class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">M Jesin Milesh</div>
+                                    <div class="organizer-person-role">Registration & Technical Head</div>
+                                </div>
+                            </div>
+                            <a href="tel:+917418431480" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 74184 31480
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Libinesh.png" alt="Libinesh R U" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Libinesh R U</div>
+                                    <div class="organizer-person-role">Marketing Head</div>
+                                </div>
+                            </div>
+                            <a href="tel:+919514159632" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 95141 59632
+                            </a>
+                        </div>
+
+
+                        <div class="organizer-person-box hud-panel">
+                            <div class="organizer-person-left">
+                                <div class="organizer-person-avatar-wrap">
+                                    <img src="Jeswanth.jpeg" alt="Jeshwanth V" class="organizer-person-avatar-img">
+                                </div>
+                                <div class="organizer-person-details">
+                                    <div class="organizer-person-name">Jeshwanth V</div>
+                                    <div class="organizer-person-role">Marketing Head</div>
+                                </div>
+                            </div>
+                            <a href="tel:+917200355299" class="organizer-person-phone">
+                                <i class="fas fa-phone-alt"></i> +91 72003 55299
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="registration-cta-section" id="register">
+        <div class="container">
+            <div class="cta-battle-card hud-panel">
+                <div class="cta-tag">READY? THE CLOCK IS TICKING.</div>
+                <h2 class="cta-headline">"24 HOURS. ONE CHANCE. CAPTURE THE FLAG."</h2>
+                <div class="cta-subtext">ENLIST YOUR STRIKE TEAM FOR THE DIGITAL WARZONE</div>
+
+                <a href="register.html" class="btn btn-primary cta-btn-xl">
+                    <i class="fas fa-bolt"></i> [ REGISTER FOR XPLOITX 2.0 BETA ]
+                </a>
+
+                <div class="cta-meta-note">
+                    08 - 09 OCTOBER 2026 • REGISTRATION DEADLINE EXTENDED TO OCTOBER 04, 2026 • 24-HOUR CTF • PRATHYUSHA ENGINEERING COLLEGE
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>XPLOITX 2.0 <span class="text-green">BETA</span></h3>
+                    <p>24-HOUR CYBERSECURITY CAPTURE THE FLAG</p>
+                    <div class="org-info">
+                        Department of Cyber Security<br>
+                        Prathyusha Engineering College<br>
+                        (An Autonomous Institution)
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>NAVIGATION</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">HOME</a></li>
+                        <li><a href="about.html">ABOUT US</a></li>
+                        <li><a href="rules.html">RULES</a></li>
+                        <li><a href="prizes.html">PRIZES</a></li>
+                        <li><a href="register.html">REGISTER</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>COMMUNICATIONS</h4>
+                    <div class="footer-social-links" style="margin-bottom: 20px;">
+                        <a href="https://instagram.com/xploitxctf.2k26" target="_blank" rel="noopener noreferrer"
+                            class="social-icon-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <p style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-dim);">
+                        Official communication channels open prior to competition launch.
+                    </p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                &copy; 2026 XPLOITX 2.0 BETA • Department of Cyber Security • Prathyusha Engineering College. All rights
+                reserved.
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="script.js?v=2.7"></script>
+</body>
+
+</html>
