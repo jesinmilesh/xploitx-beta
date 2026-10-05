@@ -1717,6 +1717,15 @@ app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
 
         let isValid = false;
         let expectedPass = adminAccounts[cleanUsername];
+        let matchedOperative = cleanUsername;
+
+        if (!expectedPass) {
+            const foundKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
+            if (foundKey) {
+                expectedPass = adminAccounts[foundKey];
+                matchedOperative = foundKey;
+            }
+        }
 
         if (expectedPass && typeof expectedPass === 'string') {
             expectedPass = expectedPass.replace(/^["']|["']$/g, '').trim();
@@ -1742,7 +1751,7 @@ app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
         const clientIp = (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.ip || req.socket.remoteAddress || '127.0.0.1')).replace(/^::ffff:/, '');
 
         if (isValid) {
-            const canonicalUser = canonicalMap[cleanUsername] || username;
+            const canonicalUser = canonicalMap[matchedOperative] || canonicalMap[cleanUsername] || username;
             await logActivity('ADMIN LOGIN', `Operative "${canonicalUser}" logged into Admin Console from IP: ${clientIp}`);
             const token = jwt.sign({ username: canonicalUser, role: 'admin' }, JWT_SECRET, { expiresIn: '2h', algorithm: 'HS256' });
 
@@ -3319,6 +3328,9 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
             "Ashish": process.env.ADMIN_PASS_ASHISH,
             "Madhu": process.env.ADMIN_PASS_MADHU,
             "Jeshwanth": process.env.ADMIN_PASS_JESHWANTH,
+            "Rubika": process.env.ATTENDANCE_PASS_RUBIKA,
+            "Subashini": process.env.ATTENDANCE_PASS_SUBASHINI,
+            "Tharun": process.env.ATTENDANCE_PASS_THARUN,
             "attendance": process.env.ATTENDANCE_SECURITY_KEY || process.env.ADMIN_PASS_ADMINISTRATOR
         };
 
@@ -3328,18 +3340,35 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
             "Ashish": "Ashish",
             "Madhu": "Madhu",
             "Jeshwanth": "Jeshwanth",
+            "Rubika": "Rubika",
+            "Subashini": "Subashini",
+            "Tharun": "Tharun",
             "attendance": "Attendance Officer"
         };
 
 
         const operationalKey = process.env.ATTENDANCE_SECURITY_KEY || process.env.ATTENDANCE_KEY;
-        if (operationalKey && cleanUsername === 'attendance') {
+        if (operationalKey && (cleanUsername.toLowerCase() === 'attendance' || cleanUsername.toLowerCase() === 'admin')) {
             adminAccounts['attendance'] = operationalKey;
             canonicalMap['attendance'] = 'Attendance Officer';
         }
 
         let isValid = false;
         let expectedPass = adminAccounts[cleanUsername];
+        let matchedOperative = cleanUsername;
+
+        if (!expectedPass) {
+            const foundKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
+            if (foundKey) {
+                expectedPass = adminAccounts[foundKey];
+                matchedOperative = foundKey;
+            }
+        }
+
+        if (!expectedPass && cleanUsername.toLowerCase() === 'admin') {
+            expectedPass = adminAccounts['attendance'];
+            matchedOperative = 'attendance';
+        }
 
         if (expectedPass && typeof expectedPass === 'string') {
             expectedPass = expectedPass.replace(/^["']|["']$/g, '').trim();
@@ -3353,10 +3382,15 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
         }
 
         if (isValid) {
-            const canonicalUser = canonicalMap[cleanUsername] || username;
+            const canonicalUser = canonicalMap[matchedOperative] || canonicalMap[cleanUsername] || username;
             logActivity('ATTENDANCE LOGIN', `Operative "${canonicalUser}" authenticated into Attendance Terminal`);
+
+            // Strictly isolate permissions: attendance operatives get role: 'attendance_operative' with scope: 'attendance' (no admin console access)
+            const adminUsers = ["Administrator", "Jesin Milesh", "Ashish", "Madhu", "Jeshwanth"];
+            const assignedRole = adminUsers.includes(canonicalUser) ? 'admin' : 'attendance_operative';
+
             const token = jwt.sign(
-                { username: canonicalUser, role: 'admin', scope: 'attendance' },
+                { username: canonicalUser, role: assignedRole, scope: 'attendance' },
                 JWT_SECRET,
                 { expiresIn: '2h', algorithm: 'HS256' }
             );
