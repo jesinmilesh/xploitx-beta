@@ -2687,7 +2687,7 @@ const registrationPayloadSchema = z.object({
     event: z.string().max(100).optional().default('24-Hour Hackathon'),
     day: z.string().max(50).optional().default('Day 1'),
     utrNumber: z.string().min(6, 'UTR / Transaction ID must be at least 6 characters').max(40, 'UTR / Transaction ID too long').regex(/^[a-zA-Z0-9_\-\s]+$/, 'UTR contains invalid characters').trim(),
-    members: z.array(memberValidationSchema).min(2, 'Team size must be between 2 and 4 members (1 Leader + 1 to 3 Squad Members).').max(4, 'Team cannot exceed 4 members.')
+    members: z.array(memberValidationSchema).min(1, 'Team size must be between 1 and 4 members.').max(4, 'Team cannot exceed 4 members.')
 });
 
 app.post('/api/auth/register-with-payment', registrationLimiter, upload.single('paymentProof'), async (req, res) => {

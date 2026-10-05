@@ -12,7 +12,7 @@ const EVENT_CONFIG = {
     registrationDeadline: "October 07, 2026 (Extended)",
     venue: "Prathyusha Engineering College (Offline In-Person)",
     registrationLink: "register.html",
-    teamSize: "2 - 4 Members",
+    teamSize: "1 - 4 Members",
     prizePool: "Worth up to ₹1,00,000",
     registrationFee: "₹150 per head (Early Bird Offer)"
 };
@@ -887,7 +887,7 @@ function showDeadlinePopup() {
             </div>
 
             <div class="deadline-perks-row">
-                <span><i class="fas fa-users"></i> 2-4 Members</span>
+                <span><i class="fas fa-users"></i> 1-4 Members</span>
                 <span><i class="fas fa-trophy"></i> ₹1,00,000 Prize Pool</span>
                 <span><i class="fas fa-shield-alt"></i> ₹150 Early Bird</span>
             </div>
