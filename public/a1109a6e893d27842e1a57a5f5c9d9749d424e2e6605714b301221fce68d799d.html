@@ -1687,6 +1687,7 @@
                 const authRoot = document.getElementById('admin-authenticated-root');
                 if (authRoot) {
                     authRoot.style.removeProperty('display');
+                    authRoot.style.setProperty('display', 'block', 'important');
                 }
 
                 const overlay = document.getElementById('login-overlay');
@@ -1698,36 +1699,32 @@
 
                 if (authenticatedUser === 'Administrator') {
                     const statsCont = document.getElementById('admin-stats-container');
-                    if (statsCont) statsCont.style.display = 'none';
+                    if (statsCont) statsCont.style.display = 'grid';
                     const ctrlCont = document.getElementById('admin-controls-container');
-                    if (ctrlCont) ctrlCont.style.display = 'none';
+                    if (ctrlCont) ctrlCont.style.display = 'block';
                     const tblCont = document.getElementById('admin-table-container');
-                    if (tblCont) tblCont.style.display = 'none';
+                    if (tblCont) tblCont.style.display = 'block';
                     const coordSec = document.getElementById('coordinators');
-                    if (coordSec) coordSec.style.display = 'none';
-
+                    if (coordSec) coordSec.style.display = 'block';
 
                     const heroTitle = document.getElementById('admin-hero-title');
                     if (heroTitle) heroTitle.innerText = '>_ HIGH COMMAND AUDIT & SURVEILLANCE CONSOLE';
                     const heroDesc = document.getElementById('admin-hero-desc');
-                    if (heroDesc) heroDesc.innerText = 'Exclusive Real-time Activity Logs: Operative Access, Logins, and Old ➔ New Data Modifications';
+                    if (heroDesc) heroDesc.innerText = 'Central Administrative Verification, Strike Team Auditing & Real-time Surveillance';
                     const heroBadge = document.getElementById('admin-hero-badge');
-                    if (heroBadge) heroBadge.innerHTML = '<span class="pulse-dot"></span> [ HIGH COMMAND EXCLUSIVE • AUDIT LOG SYSTEM ]';
-
+                    if (heroBadge) heroBadge.innerHTML = '<span class="pulse-dot"></span> [ HIGH COMMAND EXCLUSIVE • FULL AUDIT OVERWATCH ]';
 
                     const actDash = document.getElementById('administrator-activity-dashboard');
                     if (actDash) actDash.style.display = 'block';
 
-
-                    if (window.adminDataInterval) {
-                        clearInterval(window.adminDataInterval);
-                        window.adminDataInterval = null;
+                    loadData();
+                    if (!window.adminDataInterval) {
+                        window.adminDataInterval = setInterval(loadData, 6000);
                     }
-
 
                     loadAdminActivityLogs();
                     if (window.adminActivityInterval) clearInterval(window.adminActivityInterval);
-                    window.adminActivityInterval = setInterval(loadAdminActivityLogs, 3000);
+                    window.adminActivityInterval = setInterval(loadAdminActivityLogs, 4000);
                 } else {
                     const statsCont = document.getElementById('admin-stats-container');
                     if (statsCont) statsCont.style.display = 'grid';
