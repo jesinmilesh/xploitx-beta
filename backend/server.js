@@ -1128,7 +1128,7 @@ const initialiseDBAndServer = async () => {
     if (mongoUri) {
         try {
             await mongoose.connect(mongoUri, {
-                serverSelectionTimeoutMS: 5000
+                serverSelectionTimeoutMS: 10000
             });
             isMongoConnected = true;
             console.log('✅ Connected to MongoDB Atlas successfully!');
@@ -3438,7 +3438,7 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
             logActivity('ATTENDANCE LOGIN', `Operative "${canonicalUser}" authenticated into Attendance Terminal`);
 
             // Strictly isolate permissions: attendance operatives get role: 'attendance_operative' with scope: 'attendance' (no admin console access)
-            const adminUsers = ["Administrator", "Jesin Milesh", "Ashish", "Madhu", "Jeshwanth"];
+            const adminUsers = ["Administrator", "Admin", "Jesin Milesh", "Jesin", "Ashish", "Madhu", "Jeshwanth", "Jeswanth"];
             const assignedRole = adminUsers.includes(canonicalUser) ? 'admin' : 'attendance_operative';
 
             const token = jwt.sign(
