@@ -549,6 +549,7 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net", "https://unpkg.com"],
+            scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://img.icons8.com", "https://api.qrserver.com", "https://quickchart.io", "blob:"],
@@ -566,7 +567,8 @@ app.use(helmet({
     },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     permittedCrossDomainPolicies: { permittedPolicies: 'none' },
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 app.use((req, res, next) => {
@@ -1149,19 +1151,27 @@ const initialiseDBAndServer = async () => {
     const isProductionEnv = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || !!process.env.VERCEL_ENV;
 
     if (mongoUri) {
-        try {
-            await mongoose.connect(mongoUri, {
-                serverSelectionTimeoutMS: 15000
-            });
-            isMongoConnected = true;
-            console.log('✅ Connected to MongoDB Atlas successfully!');
-        } catch (err) {
-            console.error('❌ MongoDB Atlas Connection Error:', err.message);
-            if (isProductionEnv) {
-                console.error('[SECURITY GUARD] Production environment requires MongoDB Atlas. Silent SQLite fallback disabled to prevent data divergence.');
-                return;
-            } else {
-                console.log('⚠️ Falling back to local SQLite database in development...');
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                await mongoose.connect(mongoUri, {
+                    serverSelectionTimeoutMS: 10000
+                });
+                isMongoConnected = true;
+                console.log('✅ Connected to MongoDB Atlas successfully!');
+                break;
+            } catch (err) {
+                console.warn(`[Database] MongoDB Atlas connection attempt ${attempt}/3 failed: ${err.message}`);
+                if (attempt < 3) {
+                    await new Promise(r => setTimeout(r, 1500));
+                } else {
+                    console.error('❌ MongoDB Atlas Connection Error:', err.message);
+                    if (isProductionEnv) {
+                        console.error('[SECURITY GUARD] Production environment requires MongoDB Atlas. Silent SQLite fallback disabled to prevent data divergence.');
+                        return;
+                    } else {
+                        console.log('⚠️ Falling back to local SQLite database in development...');
+                    }
+                }
             }
         }
     }

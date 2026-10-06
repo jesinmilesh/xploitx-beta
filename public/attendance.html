@@ -1197,24 +1197,24 @@
             const form = document.getElementById('attendance-login-form');
             const btn = document.getElementById('login-btn');
             const logoutBtn = document.getElementById('attendance-logout-btn');
-            if (form && !form.dataset.bound) {
-                form.dataset.bound = "true";
+            if (form && !form.getAttribute('data-bound')) {
+                form.setAttribute('data-bound', "true");
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     checkAttendanceLogin();
                 });
             }
-            if (btn && !btn.dataset.bound) {
-                btn.dataset.bound = "true";
+            if (btn && !btn.getAttribute('data-bound')) {
+                btn.setAttribute('data-bound', "true");
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     checkAttendanceLogin();
                 });
             }
-            if (logoutBtn && !logoutBtn.dataset.bound) {
-                logoutBtn.dataset.bound = "true";
+            if (logoutBtn && !logoutBtn.getAttribute('data-bound')) {
+                logoutBtn.setAttribute('data-bound', "true");
                 logoutBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1434,6 +1434,31 @@
                 stopScanner();
                 loadAttendance();
             }
+        }
+        window.switchTab = switchTab;
+
+        function bindTabControls() {
+            const btnScan = document.getElementById('btn-scan');
+            const btnDetails = document.getElementById('btn-details');
+            if (btnScan && !btnScan.getAttribute('data-tab-bound')) {
+                btnScan.setAttribute('data-tab-bound', 'true');
+                btnScan.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab('scan');
+                });
+            }
+            if (btnDetails && !btnDetails.getAttribute('data-tab-bound')) {
+                btnDetails.setAttribute('data-tab-bound', 'true');
+                btnDetails.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab('details');
+                });
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindTabControls);
+        } else {
+            bindTabControls();
         }
 
         function isPermissionError(err) {

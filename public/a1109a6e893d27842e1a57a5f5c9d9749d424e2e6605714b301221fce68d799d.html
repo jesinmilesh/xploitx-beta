@@ -1764,24 +1764,24 @@
             const form = document.getElementById('admin-login-form');
             const btn = document.getElementById('admin-login-btn') || document.querySelector('.login-submit-btn');
             const logoutBtn = document.getElementById('top-nav-logout-btn');
-            if (form && !form.dataset.bound) {
-                form.dataset.bound = "true";
+            if (form && !form.getAttribute('data-bound')) {
+                form.setAttribute('data-bound', "true");
                 form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     checkAdmin();
                 });
             }
-            if (btn && !btn.dataset.bound) {
-                btn.dataset.bound = "true";
+            if (btn && !btn.getAttribute('data-bound')) {
+                btn.setAttribute('data-bound', "true");
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     checkAdmin();
                 });
             }
-            if (logoutBtn && !logoutBtn.dataset.bound) {
-                logoutBtn.dataset.bound = "true";
+            if (logoutBtn && !logoutBtn.getAttribute('data-bound')) {
+                logoutBtn.setAttribute('data-bound', "true");
                 logoutBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -2031,7 +2031,7 @@
             renderTable(filtered);
         }
 
-        window.filterStatus = function (status, btnEl) {
+        function filterStatus(status, btnEl) {
             window.currentStatusFilter = status;
             if (btnEl) {
                 document.querySelectorAll('#filter-st-all, #filter-st-ready, #filter-st-standby, #filter-st-pending, #filter-st-untracked')
@@ -2039,9 +2039,10 @@
                 btnEl.classList.add('active-gold');
             }
             applyFilters();
-        };
+        }
+        window.filterStatus = filterStatus;
 
-        window.filterEvent = function (eventType, btnEl) {
+        function filterEvent(eventType, btnEl) {
             window.currentEventFilter = eventType;
             if (btnEl) {
                 document.querySelectorAll('#filter-ev-all, #filter-ev-ctf, #filter-ev-workshop, #filter-ev-defense, #filter-ev-forensics, #filter-ev-paper, #filter-ev-other')
@@ -2049,11 +2050,13 @@
                 btnEl.classList.add('active');
             }
             applyFilters();
-        };
+        }
+        window.filterEvent = filterEvent;
 
-        window.performSearch = function () {
+        function performSearch() {
             applyFilters();
-        };
+        }
+        window.performSearch = performSearch;
 
         async function loadData() {
             try {
@@ -3054,6 +3057,96 @@
         }
 
         
+        // Explicitly export all interactive functions to window scope to guarantee availability
+        window.openCSVModal = openCSVModal;
+        window.closeCSVModal = closeCSVModal;
+        window.executeCSVDownload = executeCSVDownload;
+        window.openPrintModal = openPrintModal;
+        window.closePrintModal = closePrintModal;
+        window.executePrint = executePrint;
+        window.openFormatModal = openFormatModal;
+        window.closeFormatModal = closeFormatModal;
+        window.executeFormat = executeFormat;
+        window.openLogModal = typeof openLogModal === 'function' ? openLogModal : function() {};
+        window.closeLogModal = typeof closeLogModal === 'function' ? closeLogModal : function() {};
+        window.openVerifyModal = openVerifyModal;
+        window.closeVerifyModal = closeVerifyModal;
+        window.openEditModal = openEditModal;
+        window.closeEditModal = closeEditModal;
+        window.deleteTeam = deleteTeam;
+        window.performDelete = performDelete;
+        window.performVerification = performVerification;
+        window.performReject = performReject;
+        window.performRestore = performRestore;
+        window.downloadODLetter = downloadODLetter;
+        window.resendPaymentVerification = resendPaymentVerification;
+        window.downloadCSV = downloadCSV;
+        window.performSearch = performSearch;
+        window.applyFilters = applyFilters;
+        window.filterEvent = filterEvent;
+        window.filterStatus = filterStatus;
+        window.loadData = loadData;
+        window.saveEditChanges = saveEditChanges;
+        window.addNewMember = addNewMember;
+
+        // Universal Button Click Delegator to safeguard against CSP inline restrictions
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('button, a');
+            if (!btn) return;
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            const btnText = (btn.innerText || '').trim();
+
+            if (onclickAttr.includes('openVerifyModal')) {
+                const match = onclickAttr.match(/openVerifyModal\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    openVerifyModal(match[1]);
+                }
+            } else if (onclickAttr.includes('openEditModal')) {
+                const match = onclickAttr.match(/openEditModal\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    openEditModal(match[1]);
+                }
+            } else if (onclickAttr.includes('deleteTeam')) {
+                const match = onclickAttr.match(/deleteTeam\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    deleteTeam(match[1]);
+                }
+            } else if (onclickAttr.includes('downloadODLetter')) {
+                const match = onclickAttr.match(/downloadODLetter\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    downloadODLetter(match[1]);
+                }
+            } else if (onclickAttr.includes('resendPaymentVerification')) {
+                const match = onclickAttr.match(/resendPaymentVerification\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    resendPaymentVerification(match[1]);
+                }
+            } else if (onclickAttr.includes('performRestore')) {
+                const match = onclickAttr.match(/performRestore\(['"]([^'"]+)['"]\)/);
+                if (match && match[1]) {
+                    e.preventDefault();
+                    performRestore(match[1]);
+                }
+            } else if (onclickAttr.includes('openCSVModal') || btnText.includes('DOWNLOAD CSV')) {
+                e.preventDefault();
+                openCSVModal();
+            } else if (onclickAttr.includes('openPrintModal') || btnText.includes('PRINT / SAVE PDF')) {
+                e.preventDefault();
+                openPrintModal();
+            } else if (onclickAttr.includes('openFormatModal') || btnText.includes('FORMAT REPORT')) {
+                e.preventDefault();
+                openFormatModal();
+            } else if (onclickAttr.includes('openLogModal') || btnText.includes('ACTIVITY LOG')) {
+                e.preventDefault();
+                if (window.openLogModal) window.openLogModal();
+            }
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeVerifyModal();
@@ -3061,7 +3154,7 @@
                 closeCSVModal();
                 closePrintModal();
                 closeFormatModal();
-                closeLogModal();
+                if (typeof closeLogModal === 'function') closeLogModal();
                 if (window.closeCustomAlert) window.closeCustomAlert();
                 if (window.closeCustomConfirm) window.closeCustomConfirm();
             }
