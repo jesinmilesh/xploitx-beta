@@ -25,13 +25,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 let open = null;
 let sqlite3 = null;
-if (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
-    try {
-        open = require('sqlite').open;
-        sqlite3 = require('sqlite3').verbose();
-    } catch (e) {
-        console.warn('[SQLite Notice] SQLite native bindings unavailable in local environment:', e.message);
-    }
+try {
+    open = require('sqlite').open;
+    sqlite3 = require('sqlite3').verbose();
+} catch (e) {
+    console.warn('[SQLite Notice] SQLite native bindings unavailable in serverless environment:', e.message);
 }
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -528,21 +526,9 @@ app.disable('x-powered-by');
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
-// URL and Route Normalization for Vercel / serverless deployments
-app.use((req, res, next) => {
-    // If Vercel passed /api without subpath, recover original path from routing headers
-    if (req.url === '/api' || req.url === '/api/') {
-        const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-vercel-original-url'];
-        if (original && original.startsWith('/api') && original !== '/api' && original !== '/api/') {
-            req.url = original;
-        }
-    }
-    next();
-});
-
 // Enforce HTTPS redirection in production behind reverse proxies
 app.use((req, res, next) => {
-    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
+    if (process.env.NODE_ENV === 'production') {
         const proto = req.headers['x-forwarded-proto'];
         if (proto && proto.toLowerCase() !== 'https') {
             return res.redirect(301, `https://${req.headers.host}${req.url}`);
@@ -566,7 +552,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://img.icons8.com", "https://api.qrserver.com", "https://quickchart.io", "blob:"],
-            connectSrc: ["'self'", "https://quickchart.io", "https://*.vercel.app", "https://vercel.app", "*"],
+            connectSrc: ["'self'", "https://xploitx-backend.onrender.com", "https://quickchart.io"],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"]
@@ -608,15 +594,11 @@ app.use(cors({
             origin.startsWith('file://') ||
             origin.startsWith('http://localhost') ||
             origin.startsWith('http://127.0.0.1') ||
-            origin.endsWith('.vercel.app') ||
-            origin.includes('vercel.app') ||
-            origin.includes('xploitxctf.me') ||
             allowedOrigins.includes(origin)
         ) {
             callback(null, true);
         } else {
-            // Permissive fallback so legitimate deployed clients aren't blocked
-            callback(null, true);
+            callback(new Error('CORS Policy Blocked: Access from origin ' + origin + ' is not allowed'));
         }
     },
     credentials: true
@@ -638,8 +620,8 @@ app.use((req, res, next) => {
 
 const adminLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 30,
-    skipSuccessfulRequests: true,
+    max: 5,
+    skip: () => process.env.NODE_ENV !== 'production',
     handler: (req, res) => {
         const clientIp = (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.ip || req.socket.remoteAddress || '127.0.0.1')).replace(/^::ffff:/, '');
         console.warn(`[SECURITY ALERT] Admin login brute-force threshold exceeded for IP: ${clientIp}`);
@@ -652,8 +634,8 @@ const adminLoginLimiter = rateLimit({
 
 const attendanceLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 50,
-    skipSuccessfulRequests: true,
+    max: 10,
+    skip: () => process.env.NODE_ENV !== 'production',
     message: { error: 'Too many attendance login attempts. Please try again after 15 minutes.' },
     standardHeaders: true,
     legacyHeaders: false
@@ -745,12 +727,11 @@ const getJwtSecret = () => {
     if (secret && secret.trim().length > 0) {
         return secret.trim();
     }
-    // No hardcoded secrets or passwords in the repository.
-    // Ephemeral in-memory key generated at runtime until JWT_SECRET is loaded from the environment file.
-    if (!global.__ephemeralJwtSecret) {
-        global.__ephemeralJwtSecret = crypto.randomBytes(32).toString('hex');
+    if (process.env.NODE_ENV === 'production') {
+        console.error('[SECURITY GUARD] FATAL: JWT_SECRET environment variable must be explicitly defined in production!');
+        throw new Error('JWT_SECRET configuration missing in production');
     }
-    return global.__ephemeralJwtSecret;
+    return 'xploitx_dev_only_jwt_secret_key_2026';
 };
 
 const JWT_SECRET = getJwtSecret();
@@ -870,14 +851,12 @@ app.get('/api/core/registration.js', (req, res) => {
 app.use(express.static(path.join(__dirname, '../public')));
 
 
-const uploadsDir = (process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME)
-    ? path.join(os.tmpdir(), 'uploads')
-    : path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     try {
         fs.mkdirSync(uploadsDir, { recursive: true });
     } catch (e) {
-        // Safe fallback in serverless environment
+        console.warn("Could not create uploads directory:", e.message);
     }
 }
 
@@ -1128,7 +1107,7 @@ const initialiseDBAndServer = async () => {
     if (mongoUri) {
         try {
             await mongoose.connect(mongoUri, {
-                serverSelectionTimeoutMS: 10000
+                serverSelectionTimeoutMS: 15000
             });
             isMongoConnected = true;
             console.log('✅ Connected to MongoDB Atlas successfully!');
@@ -1405,36 +1384,34 @@ async function findTeamByUTR(utr) {
 
 async function getAllTeamsData() {
     if (isDbMongo()) {
-        const [teams, members] = await Promise.all([
+        const [teams, allMembers] = await Promise.all([
             Team.find({}, { payment_proof_data: 0 }).lean(),
             Member.find().lean()
         ]);
-        const membersMap = new Map();
-        for (const m of members) {
-            const tid = m.team_id;
-            if (!membersMap.has(tid)) membersMap.set(tid, []);
-            membersMap.get(tid).push({ ...m, id: m._id ? m._id.toString() : m.id });
+        const memberMap = new Map();
+        for (const m of allMembers) {
+            if (!memberMap.has(m.team_id)) memberMap.set(m.team_id, []);
+            memberMap.get(m.team_id).push(m);
         }
         return teams.map(t => ({
             ...t,
-            id: t._id ? t._id.toString() : t.id,
-            members: membersMap.get(t.team_id) || []
+            id: t._id.toString(),
+            members: memberMap.get(t.team_id) || []
         }));
     }
     if (db) {
-        const [teams, members] = await Promise.all([
-            db.all(`SELECT id, team_id, name, email, event, day, transaction_id, payment_proof, payment_verified, created_at FROM teams`),
+        const [teams, allMembers] = await Promise.all([
+            db.all(`SELECT id, team_id, name, email, event, transaction_id, created_at, payment_proof, payment_verified, day FROM teams`),
             db.all(`SELECT * FROM members`)
         ]);
-        const membersMap = new Map();
-        for (const m of members) {
-            const tid = m.team_db_id;
-            if (!membersMap.has(tid)) membersMap.set(tid, []);
-            membersMap.get(tid).push(m);
+        const memberMap = new Map();
+        for (const m of allMembers) {
+            if (!memberMap.has(m.team_db_id)) memberMap.set(m.team_db_id, []);
+            memberMap.get(m.team_db_id).push(m);
         }
-        return teams.map(t => ({
-            ...t,
-            members: membersMap.get(t.id) || []
+        return teams.map(team => ({
+            ...team,
+            members: memberMap.get(team.id) || []
         }));
     }
     return [];
@@ -1738,11 +1715,11 @@ app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
         const cleanPassword = password.trim();
 
         const adminAccounts = {
-            "Administrator": process.env.ADMIN_PASS_ADMINISTRATOR,
-            "Jesin Milesh": process.env.ADMIN_PASS_JESIN,
-            "Ashish": process.env.ADMIN_PASS_ASHISH,
-            "Madhu": process.env.ADMIN_PASS_MADHU,
-            "Jeshwanth": process.env.ADMIN_PASS_JESHWANTH
+            "Administrator": process.env.ADMIN_PASS_ADMINISTRATOR || (process.env.NODE_ENV !== 'production' ? "Administrator@Beta2026" : undefined),
+            "Jesin Milesh": process.env.ADMIN_PASS_JESIN || (process.env.NODE_ENV !== 'production' ? "Jesin@Beta2026" : undefined),
+            "Ashish": process.env.ADMIN_PASS_ASHISH || (process.env.NODE_ENV !== 'production' ? "Ashish@Beta2026" : undefined),
+            "Madhu": process.env.ADMIN_PASS_MADHU || (process.env.NODE_ENV !== 'production' ? "Madhu@Beta2026" : undefined),
+            "Jeshwanth": process.env.ADMIN_PASS_JESHWANTH || (process.env.NODE_ENV !== 'production' ? "Jeshwanth@Beta2026" : undefined)
         };
 
         const canonicalMap = {
@@ -1754,16 +1731,8 @@ app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
         };
 
         let isValid = false;
-        let expectedPass = adminAccounts[cleanUsername];
-        let matchedOperative = cleanUsername;
-
-        if (!expectedPass) {
-            const foundKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
-            if (foundKey) {
-                expectedPass = adminAccounts[foundKey];
-                matchedOperative = foundKey;
-            }
-        }
+        const matchedKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
+        let expectedPass = matchedKey ? adminAccounts[matchedKey] : null;
 
         if (expectedPass && typeof expectedPass === 'string') {
             expectedPass = expectedPass.replace(/^["']|["']$/g, '').trim();
@@ -1789,7 +1758,7 @@ app.post('/api/admin/login', adminLoginLimiter, async (req, res) => {
         const clientIp = (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.ip || req.socket.remoteAddress || '127.0.0.1')).replace(/^::ffff:/, '');
 
         if (isValid) {
-            const canonicalUser = canonicalMap[matchedOperative] || canonicalMap[cleanUsername] || username;
+            const canonicalUser = matchedKey ? (canonicalMap[matchedKey] || matchedKey) : cleanUsername;
             await logActivity('ADMIN LOGIN', `Operative "${canonicalUser}" logged into Admin Console from IP: ${clientIp}`);
             const token = jwt.sign({ username: canonicalUser, role: 'admin' }, JWT_SECRET, { expiresIn: '2h', algorithm: 'HS256' });
 
@@ -2734,7 +2703,7 @@ const registrationPayloadSchema = z.object({
     event: z.string().max(100).optional().default('24-Hour Hackathon'),
     day: z.string().max(50).optional().default('Day 1'),
     utrNumber: z.string().min(6, 'UTR / Transaction ID must be at least 6 characters').max(40, 'UTR / Transaction ID too long').regex(/^[a-zA-Z0-9_\-\s]+$/, 'UTR contains invalid characters').trim(),
-    members: z.array(memberValidationSchema).min(1, 'Team size must be between 1 and 4 members.').max(4, 'Team cannot exceed 4 members.')
+    members: z.array(memberValidationSchema).min(2, 'Team size must be between 2 and 4 members (1 Leader + 1 to 3 Squad Members).').max(4, 'Team cannot exceed 4 members.')
 });
 
 app.post('/api/auth/register-with-payment', registrationLimiter, upload.single('paymentProof'), async (req, res) => {
@@ -3058,22 +3027,15 @@ app.post('/api/admin/verify_payment', verifyAdmin, async (req, res) => {
             const htmlContent = wrapEmailHtml(innerHtml, 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed');
 
             const hasEmailProvider = !!(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY || (process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-email')));
-            if (hasEmailProvider && recipientEmails.length > 0) {
-                (async () => {
-                    try {
-                        for (const emailAddr of recipientEmails) {
-                            await sendEmail({ to: emailAddr, subject: 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed', text: textContent, html: htmlContent, attachments });
-                        }
-                        await logActivity('EMAIL DISPATCHED', `Confirmation email with OD Letter PDF & Entry QR pass dispatched to ${recipientEmails.join(', ')} (Team [${teamId}])`);
-                    } catch (emailErr) {
-                        console.error('[Verification Email Delivery Warning]:', emailErr.message);
-                        await logActivity('EMAIL WARNING', `Email delivery to team [${teamId}] encountered an issue: ${emailErr.message}`);
-                    }
-                })();
+            if (hasEmailProvider) {
+                for (const emailAddr of recipientEmails) {
+                    await sendEmail({ to: emailAddr, subject: 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed', text: textContent, html: htmlContent, attachments });
+                }
+                await logActivity('EMAIL DISPATCHED', `Confirmation email with OD Letter PDF & Entry QR pass dispatched to ${recipientEmails.join(', ')} (Team [${teamId}])`);
             }
         }
         await logActivity('STATUS MODIFIED', `Team [${teamId}] ("${teamName}") status changed from "${prevStatus}" ➔ "READY (CONFIRMED)" by Operative "${operative}"`);
-        res.json({ success: true, message: 'Team verified and registration confirmed successfully' });
+        res.json({ success: true, message: 'Team verified and OD letter sent successfully' });
     } catch (e) {
         console.error("Verify Payment Error:", e);
         res.status(500).json({ error: e.message });
@@ -3368,15 +3330,15 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
 
 
         const adminAccounts = {
-            "Administrator": process.env.ADMIN_PASS_ADMINISTRATOR,
-            "Jesin Milesh": process.env.ADMIN_PASS_JESIN,
-            "Ashish": process.env.ADMIN_PASS_ASHISH,
-            "Madhu": process.env.ADMIN_PASS_MADHU,
-            "Jeshwanth": process.env.ADMIN_PASS_JESHWANTH,
-            "Rubika": process.env.ATTENDANCE_PASS_RUBIKA,
-            "Subashini": process.env.ATTENDANCE_PASS_SUBASHINI,
-            "Tharun": process.env.ATTENDANCE_PASS_THARUN,
-            "attendance": process.env.ATTENDANCE_SECURITY_KEY || process.env.ADMIN_PASS_ADMINISTRATOR
+            "Administrator": process.env.ADMIN_PASS_ADMINISTRATOR || (process.env.NODE_ENV !== 'production' ? "Administrator@Beta2026" : undefined),
+            "Jesin Milesh": process.env.ADMIN_PASS_JESIN || (process.env.NODE_ENV !== 'production' ? "Jesin@Beta2026" : undefined),
+            "Ashish": process.env.ADMIN_PASS_ASHISH || (process.env.NODE_ENV !== 'production' ? "Ashish@Beta2026" : undefined),
+            "Madhu": process.env.ADMIN_PASS_MADHU || (process.env.NODE_ENV !== 'production' ? "Madhu@Beta2026" : undefined),
+            "Jeshwanth": process.env.ADMIN_PASS_JESHWANTH || (process.env.NODE_ENV !== 'production' ? "Jeshwanth@Beta2026" : undefined),
+            "Rubika": process.env.ATTENDANCE_PASS_RUBIKA || (process.env.NODE_ENV !== 'production' ? "Rubika@Beta2026" : undefined),
+            "Subashini": process.env.ATTENDANCE_PASS_SUBASHINI || (process.env.NODE_ENV !== 'production' ? "Subashini@Beta2026" : undefined),
+            "Tharun": process.env.ATTENDANCE_PASS_THARUN || (process.env.NODE_ENV !== 'production' ? "Tharun@Beta2026" : undefined),
+            "attendance": process.env.ATTENDANCE_SECURITY_KEY || process.env.ADMIN_PASS_ADMINISTRATOR || (process.env.NODE_ENV !== 'production' ? "Attendance@Beta2026" : undefined)
         };
 
         const canonicalMap = {
@@ -3393,34 +3355,14 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
 
 
         const operationalKey = process.env.ATTENDANCE_SECURITY_KEY || process.env.ATTENDANCE_KEY;
-        if (operationalKey && (cleanUsername.toLowerCase() === 'attendance' || cleanUsername.toLowerCase() === 'admin')) {
+        if (operationalKey && cleanUsername.toLowerCase() === 'attendance') {
             adminAccounts['attendance'] = operationalKey;
             canonicalMap['attendance'] = 'Attendance Officer';
         }
 
         let isValid = false;
-        let expectedPass = adminAccounts[cleanUsername];
-        let matchedOperative = cleanUsername;
-
-        if (!expectedPass) {
-            const foundKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
-            if (foundKey) {
-                expectedPass = adminAccounts[foundKey];
-                matchedOperative = foundKey;
-            }
-        }
-
-        if (cleanUsername.toLowerCase() === 'admin') {
-            const adminPass = (process.env.ADMIN_PASS_ADMINISTRATOR || '').replace(/^["']|["']$/g, '').trim();
-            const attKey = (process.env.ATTENDANCE_SECURITY_KEY || '').replace(/^["']|["']$/g, '').trim();
-            if (cleanPassword === adminPass || cleanPassword === attKey) {
-                isValid = true;
-                matchedOperative = 'Administrator';
-            } else {
-                expectedPass = adminAccounts['attendance'] || adminAccounts['Administrator'];
-                matchedOperative = 'attendance';
-            }
-        }
+        const matchedKey = Object.keys(adminAccounts).find(k => k.toLowerCase() === cleanUsername.toLowerCase());
+        let expectedPass = matchedKey ? adminAccounts[matchedKey] : null;
 
         if (expectedPass && typeof expectedPass === 'string') {
             expectedPass = expectedPass.replace(/^["']|["']$/g, '').trim();
@@ -3434,10 +3376,9 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
         }
 
         if (isValid) {
-            const canonicalUser = canonicalMap[matchedOperative] || canonicalMap[cleanUsername] || username;
+            const canonicalUser = matchedKey ? (canonicalMap[matchedKey] || matchedKey) : cleanUsername;
             logActivity('ATTENDANCE LOGIN', `Operative "${canonicalUser}" authenticated into Attendance Terminal`);
-
-            // Strictly isolate permissions: attendance operatives get role: 'attendance_operative' with scope: 'attendance' (no admin console access)
+            
             const adminUsers = ["Administrator", "Admin", "Jesin Milesh", "Jesin", "Ashish", "Madhu", "Jeshwanth", "Jeswanth"];
             const assignedRole = adminUsers.includes(canonicalUser) ? 'admin' : 'attendance_operative';
 
@@ -3698,6 +3639,7 @@ app.post('/api/attendance/toggle_member', verifyAttendanceAuth, async (req, res)
         res.status(500).json({ error: 'Failed to update member attendance' });
     }
 });
+
 
 app.get('/api/attendance/all', verifyAttendanceAuth, async (req, res) => {
     try {
