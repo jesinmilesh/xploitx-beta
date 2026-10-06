@@ -25,11 +25,13 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 let open = null;
 let sqlite3 = null;
-try {
-    open = require('sqlite').open;
-    sqlite3 = require('sqlite3').verbose();
-} catch (e) {
-    console.warn('[SQLite Notice] SQLite native bindings unavailable in serverless environment:', e.message);
+if (!process.env.VERCEL && !process.env.VERCEL_ENV && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    try {
+        open = require('sqlite').open;
+        sqlite3 = require('sqlite3').verbose();
+    } catch (e) {
+        console.warn('[SQLite Notice] SQLite native bindings unavailable in local environment:', e.message);
+    }
 }
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
@@ -869,12 +871,14 @@ app.get('/api/core/registration.js', (req, res) => {
 app.use(express.static(path.join(__dirname, '../public')));
 
 
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = (process.env.VERCEL || process.env.VERCEL_ENV || process.env.AWS_LAMBDA_FUNCTION_NAME)
+    ? path.join(os.tmpdir(), 'uploads')
+    : path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     try {
         fs.mkdirSync(uploadsDir, { recursive: true });
     } catch (e) {
-        console.warn("Could not create uploads directory:", e.message);
+        // Safe fallback in serverless environment
     }
 }
 
