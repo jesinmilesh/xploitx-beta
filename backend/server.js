@@ -637,7 +637,8 @@ app.use((req, res, next) => {
 
 const adminLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 30,
+    skipSuccessfulRequests: true,
     handler: (req, res) => {
         const clientIp = (req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.ip || req.socket.remoteAddress || '127.0.0.1')).replace(/^::ffff:/, '');
         console.warn(`[SECURITY ALERT] Admin login brute-force threshold exceeded for IP: ${clientIp}`);
@@ -650,7 +651,8 @@ const adminLoginLimiter = rateLimit({
 
 const attendanceLoginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 50,
+    skipSuccessfulRequests: true,
     message: { error: 'Too many attendance login attempts. Please try again after 15 minutes.' },
     standardHeaders: true,
     legacyHeaders: false
