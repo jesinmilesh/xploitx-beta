@@ -18,11 +18,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/jpeg" href="Favicon.jpeg">
     <link rel="apple-touch-icon" href="Favicon.jpeg">
+    <script src="config.js"></script>
 
     
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" defer></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         :root {
@@ -968,19 +969,21 @@
             }
         }
 
-        let API_BASE_URL = '';
+        let API_BASE_URL = (typeof window.API_BASE_URL === 'string') ? window.API_BASE_URL : '';
         const currentHostname = window.location.hostname;
         const currentProtocol = window.location.protocol;
         const currentPort = window.location.port;
 
-        if (currentProtocol === 'file:') {
-            API_BASE_URL = 'http://localhost:3000';
-        } else if (currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
-            API_BASE_URL = (currentPort === '3000' || !currentPort) ? '' : 'http://localhost:3000';
-        } else if (currentHostname.startsWith('192.168.') || currentHostname.startsWith('10.') || currentHostname.startsWith('172.')) {
-            API_BASE_URL = currentPort === '3000' ? '' : `http://${currentHostname}:3000`;
-        } else {
-            API_BASE_URL = '';
+        if (!API_BASE_URL) {
+            if (currentProtocol === 'file:') {
+                API_BASE_URL = 'http://localhost:3000';
+            } else if (currentHostname === 'localhost' || currentHostname === '127.0.0.1') {
+                API_BASE_URL = (currentPort === '3000' || !currentPort) ? '' : 'http://localhost:3000';
+            } else if (currentHostname.startsWith('192.168.') || currentHostname.startsWith('10.') || currentHostname.startsWith('172.')) {
+                API_BASE_URL = currentPort === '3000' ? '' : `http://${currentHostname}:3000`;
+            } else {
+                API_BASE_URL = '';
+            }
         }
 
         let inMemoryAttendanceToken = null;
@@ -1737,7 +1740,21 @@
                 const resData = await response.json();
 
                 if (response.ok) {
-                    if (feedback) feedback.innerHTML = '<span style="color: var(--doom-green); font-weight: bold;">✓ ATTENDANCE SUCCESSFULLY RECORDED</span>';
+                    if (feedback) {
+                        feedback.innerHTML = `
+                            <div style="margin-top: 10px; padding: 12px; background: rgba(0, 255, 102, 0.1); border: 1px solid var(--doom-green); border-radius: 6px;">
+                                <div style="color: var(--doom-green); font-weight: bold; margin-bottom: 10px;"><i class="fas fa-check-circle"></i> ATTENDANCE SUCCESSFULLY RECORDED</div>
+                                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                                    <button type="button" onclick="resumeScanning()" class="action-btn-hud action-btn-green" style="padding: 8px 16px; font-size: 0.85rem;">
+                                        <i class="fas fa-qrcode"></i> SCAN NEXT SQUAD
+                                    </button>
+                                    <button type="button" onclick="switchTab('details')" class="action-btn-hud action-btn-cyan" style="padding: 8px 16px; font-size: 0.85rem;">
+                                        <i class="fas fa-list-alt"></i> VIEW REGISTRY
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
                     loadAttendance();
                 } else {
                     if (feedback) feedback.innerHTML = `<span style="color: var(--deep-magenta);">Failed: ${resData.error}</span>`;
@@ -1920,15 +1937,22 @@
                 const statusClass = isPresent ? 'status-present' : 'status-absent';
                 const isLeader = r.role === 'LEADER';
                 const sno = `#${String(index + 1).padStart(2, '0')}`;
+                const memberDbId = r.id || r._id || '';
+                const memberRawName = (r.member_name || r.name || '').replace(/'/g, "\\'");
+                const nextStatus = isPresent ? 'ABSENT' : 'PRESENT';
 
                 return `
                     <tr>
-                        <td style="color: #8b9bb4; font-weight: bold;" title="DB ID: ${r.id}">${sno}</td>
+                        <td style="color: #8b9bb4; font-weight: bold;" title="DB ID: ${memberDbId}">${sno}</td>
                         <td style="color: var(--doom-green); font-weight: bold;">${r.team_id || '-'}</td>
                         <td style="color: #fff; font-weight: 600;">${r.member_name || r.name || '-'}</td>
                         <td><span class="role-badge ${isLeader ? 'leader' : ''}">${r.role || 'MEMBER'}</span></td>
                         <td>${r.college || '-'}</td>
-                        <td><span class="status-badge ${statusClass}">${r.status || 'ABSENT'}</span></td>
+                        <td>
+                            <button type="button" onclick="toggleMemberAttendance('${r.team_id}', '${memberDbId}', '${memberRawName}', '${nextStatus}')" class="status-badge ${statusClass}" style="cursor: pointer; border: 1px solid currentColor; background: transparent;" title="Click to toggle status to ${nextStatus}">
+                                ${r.status || 'ABSENT'} <i class="fas fa-sync-alt" style="font-size: 0.7em; margin-left: 4px;"></i>
+                            </button>
+                        </td>
                         <td style="color: #8b9bb4; font-size: 0.8rem;">
                             ${formatEntryTime(r.entry_time)}
                         </td>
@@ -1936,6 +1960,38 @@
                 `;
             }).join('');
         }
+
+        async function toggleMemberAttendance(teamId, memberId, memberName, newStatus) {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/attendance/toggle_member`, {
+                    method: 'POST',
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    credentials: 'omit',
+                    body: JSON.stringify({ teamId, memberId, memberName, newStatus })
+                });
+                if (res.status === 401) {
+                    handleAuthExpired();
+                    return;
+                }
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    const item = attendanceRawData.find(x => 
+                        (memberId && (x.id === memberId || x._id === memberId)) ||
+                        (x.team_id === teamId && (x.member_name === memberName || x.name === memberName))
+                    );
+                    if (item) {
+                        item.status = data.status;
+                        item.entry_time = data.entry_time;
+                    }
+                    filterAttendanceTable();
+                } else {
+                    showCustomAlert('Unable to update attendance: ' + (data.error || 'Server error'));
+                }
+            } catch (err) {
+                showCustomAlert('Error: ' + err.message);
+            }
+        }
+        window.toggleMemberAttendance = toggleMemberAttendance;
 
         function filterAttendanceTable() {
             const query = document.getElementById('attendance-search').value.toLowerCase().trim();
