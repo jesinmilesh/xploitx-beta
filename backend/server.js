@@ -553,7 +553,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://img.icons8.com", "https://api.qrserver.com", "https://quickchart.io", "blob:"],
-            connectSrc: ["'self'", "https://xploitx-backend.onrender.com", "https://quickchart.io"],
+            connectSrc: ["'self'", "https://*.vercel.app", "https://quickchart.io"],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"]
@@ -581,23 +581,28 @@ app.use((req, res, next) => {
     next();
 });
 
-
 const allowedOrigins = [
     'https://xploitxctf.me',
     'https://www.xploitxctf.me',
     process.env.FRONTEND_URL
 ].filter(Boolean);
 
+const isOriginAllowed = (origin) => {
+    if (!origin || origin === 'null') return true;
+    if (origin.startsWith('file://') || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) return true;
+    if (/^http:\/\/192\.168\.|^http:\/\/10\.|^http:\/\/172\./.test(origin)) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    try {
+        const hostname = new URL(origin).hostname;
+        if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) return true;
+        if (hostname === 'xploitxctf.me' || hostname.endsWith('.xploitxctf.me')) return true;
+    } catch (e) { }
+    return false;
+};
+
 app.use(cors({
     origin: (origin, callback) => {
-        if (
-            !origin ||
-            origin === 'null' ||
-            origin.startsWith('file://') ||
-            origin.startsWith('http://localhost') ||
-            origin.startsWith('http://127.0.0.1') ||
-            allowedOrigins.includes(origin)
-        ) {
+        if (isOriginAllowed(origin)) {
             callback(null, true);
         } else {
             callback(new Error('CORS Policy Blocked: Access from origin ' + origin + ' is not allowed'));
@@ -608,13 +613,34 @@ app.use(cors({
 
 app.use(bodyParser.json({ limit: '5mb' }));
 
-
 app.use((req, res, next) => {
     if (req.body && typeof req.body === 'object') {
         mongoSanitize.sanitize(req.body, { replaceWith: '_' });
     }
     if (req.params && typeof req.params === 'object') {
         mongoSanitize.sanitize(req.params, { replaceWith: '_' });
+    }
+    next();
+});
+
+// URL Normalization for Vercel Serverless Function rewrites
+app.use((req, res, next) => {
+    if (req.url && !req.url.startsWith('/api') && !req.url.startsWith('/uploads')) {
+        if (req.url.startsWith('/admin/') || req.url.startsWith('/attendance/') || req.url.startsWith('/auth/') || req.url.startsWith('/team/')) {
+            req.url = '/api' + req.url;
+        }
+    }
+    next();
+});
+
+// Early database connection middleware: guarantees DB availability for all endpoints
+app.use(async (req, res, next) => {
+    try {
+        if (!isDbMongo() && !db) {
+            await initialiseDBAndServer();
+        }
+    } catch (e) {
+        console.error('[Middleware DB Connection Error]:', e.message);
     }
     next();
 });
@@ -1001,24 +1027,6 @@ app.get('/api/admin/payment_proof/:teamId', verifyAdmin, async (req, res) => {
     }
 });
 
-
-app.use(async (req, res, next) => {
-    try {
-        if (!isDbMongo() && !db) {
-            if (!dbInitPromise) {
-                dbInitPromise = initialiseDBAndServer();
-            }
-            await dbInitPromise;
-        }
-    } catch (e) {
-        console.error('Middleware DB connect error:', e.message);
-    } finally {
-        dbInitPromise = null;
-    }
-    next();
-});
-
-
 const multer = require('multer');
 
 const storage = multer.diskStorage({
@@ -1142,38 +1150,45 @@ function isDbMongo() {
     return mongoose.connection && mongoose.connection.readyState === 1;
 }
 
-const initialiseDBAndServer = async () => {
+async function initialiseDBAndServer() {
     if (isDbMongo()) {
         isMongoConnected = true;
         return;
+    }
+    if (dbInitPromise) {
+        return dbInitPromise;
     }
     const mongoUri = (process.env.MONGODB_URI || '').trim();
     const isProductionEnv = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || !!process.env.VERCEL_ENV;
 
     if (mongoUri) {
-        for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-                await mongoose.connect(mongoUri, {
-                    serverSelectionTimeoutMS: 10000
-                });
-                isMongoConnected = true;
-                console.log('✅ Connected to MongoDB Atlas successfully!');
-                break;
-            } catch (err) {
-                console.warn(`[Database] MongoDB Atlas connection attempt ${attempt}/3 failed: ${err.message}`);
-                if (attempt < 3) {
-                    await new Promise(r => setTimeout(r, 1500));
-                } else {
-                    console.error('❌ MongoDB Atlas Connection Error:', err.message);
-                    if (isProductionEnv) {
-                        console.error('[SECURITY GUARD] Production environment requires MongoDB Atlas. Silent SQLite fallback disabled to prevent data divergence.');
-                        return;
+        dbInitPromise = (async () => {
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    await mongoose.connect(mongoUri, {
+                        serverSelectionTimeoutMS: 10000
+                    });
+                    isMongoConnected = true;
+                    console.log('✅ Connected to MongoDB Atlas successfully!');
+                    break;
+                } catch (err) {
+                    console.warn(`[Database] MongoDB Atlas connection attempt ${attempt}/3 failed: ${err.message}`);
+                    if (attempt < 3) {
+                        await new Promise(r => setTimeout(r, 1500));
                     } else {
-                        console.log('⚠️ Falling back to local SQLite database in development...');
+                        console.error('❌ MongoDB Atlas Connection Error:', err.message);
+                        if (isProductionEnv) {
+                            console.error('[SECURITY GUARD] Production environment requires MongoDB Atlas. Silent SQLite fallback disabled to prevent data divergence.');
+                            return;
+                        } else {
+                            console.log('⚠️ Falling back to local SQLite database in development...');
+                        }
                     }
                 }
             }
-        }
+        })();
+        await dbInitPromise;
+        dbInitPromise = null;
     }
 
     if (!isDbMongo() && !db && !isProductionEnv && open && sqlite3) {
