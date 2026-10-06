@@ -535,19 +535,6 @@ app.use((req, res, next) => {
             req.url = original;
         }
     }
-    // If the path arrived without /api prefix due to rewrite stripping, prepend /api
-    if (req.url && !req.url.startsWith('/api') && (
-        req.url.startsWith('/admin') ||
-        req.url.startsWith('/attendance') ||
-        req.url.startsWith('/teams') ||
-        req.url.startsWith('/auth') ||
-        req.url.startsWith('/registration') ||
-        req.url.startsWith('/health') ||
-        req.url.startsWith('/verify_payment') ||
-        req.url.startsWith('/reject_payment')
-    )) {
-        req.url = '/api' + req.url;
-    }
     next();
 });
 
