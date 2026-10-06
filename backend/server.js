@@ -725,11 +725,12 @@ const getJwtSecret = () => {
     if (secret && secret.trim().length > 0) {
         return secret.trim();
     }
-    if (process.env.NODE_ENV === 'production') {
-        console.error('[SECURITY GUARD] FATAL: JWT_SECRET environment variable must be explicitly defined in production!');
-        throw new Error('JWT_SECRET configuration missing in production');
+    // No hardcoded secrets or passwords in the repository.
+    // Ephemeral in-memory key generated at runtime until JWT_SECRET is loaded from the environment file.
+    if (!global.__ephemeralJwtSecret) {
+        global.__ephemeralJwtSecret = crypto.randomBytes(32).toString('hex');
     }
-    return 'xploitx_dev_only_jwt_secret_key_2026';
+    return global.__ephemeralJwtSecret;
 };
 
 const JWT_SECRET = getJwtSecret();
