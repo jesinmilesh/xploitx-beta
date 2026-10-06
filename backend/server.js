@@ -861,24 +861,34 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 
-app.use('/uploads', verifyAdmin, express.static(path.join(__dirname, 'uploads'), {
+app.use('/uploads', verifyAdmin, (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+}, express.static(path.join(__dirname, 'uploads'), {
     dotfiles: 'ignore',
     index: false,
     setHeaders: (res) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('Content-Security-Policy', "default-src 'none'");
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
     }
 }));
 
-app.use('/uploads', verifyAdmin, express.static(path.join(os.tmpdir(), 'uploads'), {
+app.use('/uploads', verifyAdmin, (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    next();
+}, express.static(path.join(os.tmpdir(), 'uploads'), {
     dotfiles: 'ignore',
     index: false,
     setHeaders: (res) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('Content-Security-Policy', "default-src 'none'");
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
@@ -897,7 +907,8 @@ app.get('/uploads/:filename', verifyAdmin, async (req, res) => {
     }
 
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Content-Security-Policy', "default-src 'none'");
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
@@ -921,6 +932,7 @@ app.get('/uploads/:filename', verifyAdmin, async (req, res) => {
             team = await Team.findOne({
                 $or: [
                     { payment_proof: filename },
+                    { payment_proof: `/uploads/${filename}` },
                     { payment_proof: { $regex: escapedFilename, $options: 'i' } },
                     { team_id: teamIdMatch }
                 ]
@@ -935,12 +947,14 @@ app.get('/uploads/:filename', verifyAdmin, async (req, res) => {
         if (team) {
             const rawData = team.payment_proof_data || (team.payment_proof && team.payment_proof.startsWith('data:') ? team.payment_proof : null);
             if (rawData) {
-                const matches = rawData.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+                const matches = rawData.match(/^data:([a-zA-Z0-9_\-\.\/+]+);base64,(.+)$/s);
                 if (matches) {
                     const mimeType = matches[1];
-                    const base64Data = matches[2];
+                    const base64Data = matches[2].replace(/\s+/g, '');
                     const imgBuffer = Buffer.from(base64Data, 'base64');
                     res.set('Content-Type', mimeType);
+                    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+                    res.setHeader('Access-Control-Allow-Origin', '*');
                     res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0');
                     res.setHeader('Pragma', 'no-cache');
                     res.setHeader('Expires', '0');
@@ -953,6 +967,36 @@ app.get('/uploads/:filename', verifyAdmin, async (req, res) => {
     }
 
     return res.status(404).send('File not found');
+});
+
+app.get('/api/admin/payment_proof/:teamId', verifyAdmin, async (req, res) => {
+    try {
+        const teamId = (req.params.teamId || '').trim();
+        let team = null;
+        if (isDbMongo()) {
+            team = await Team.findOne({ team_id: teamId }, { payment_proof: 1, payment_proof_data: 1 }).lean();
+        } else if (db) {
+            team = await db.get('SELECT payment_proof, payment_proof_data FROM teams WHERE team_id = ?', [teamId]);
+        }
+        if (!team) return res.status(404).json({ error: 'Team not found' });
+        const rawData = team.payment_proof_data || (team.payment_proof && team.payment_proof.startsWith('data:') ? team.payment_proof : null);
+        if (rawData) {
+            const matches = rawData.match(/^data:([a-zA-Z0-9_\-\.\/+]+);base64,(.+)$/s);
+            if (matches) {
+                const mimeType = matches[1];
+                const base64Data = matches[2].replace(/\s+/g, '');
+                const imgBuffer = Buffer.from(base64Data, 'base64');
+                res.set('Content-Type', mimeType);
+                res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate, max-age=0');
+                return res.send(imgBuffer);
+            }
+        }
+        return res.status(404).json({ error: 'No proof image data stored for this team' });
+    } catch (err) {
+        return res.status(500).json({ error: 'Failed to retrieve payment proof' });
+    }
 });
 
 

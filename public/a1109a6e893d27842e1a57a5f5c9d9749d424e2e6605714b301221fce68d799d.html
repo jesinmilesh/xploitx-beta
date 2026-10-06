@@ -2067,9 +2067,39 @@
         }
 
         
-        function openVerifyModal(teamId) {
+        async function openVerifyModal(teamId) {
             const team = window.teamsData.find(t => t.team_id === teamId);
             if (!team) return;
+
+            document.getElementById('verify-team-id').innerText = team.team_id;
+            document.getElementById('verify-utr').innerText = team.transaction_id || "NOT PROVIDED";
+
+            const imgContainer = document.getElementById('verify-img-container');
+            imgContainer.innerHTML = `
+                <div style="padding: 28px; text-align: center; color: var(--electric-blue); font-family: var(--font-mono); font-size: 0.9rem;">
+                    <i class="fas fa-circle-notch fa-spin" style="font-size: 1.8rem; margin-bottom: 10px; display: block; color: var(--doom-green);"></i>
+                    FETCHING PAYMENT PROOF FROM ENCRYPTED ARCHIVE...
+                </div>
+            `;
+
+            document.getElementById('verify-modal').style.display = 'flex';
+            document.getElementById('do-verify-btn').onclick = () => performVerification(team.team_id);
+            document.getElementById('do-reject-btn').onclick = () => performReject(team.team_id);
+
+            // Dynamically retrieve full proof data from server if not already in memory
+            if (!team.payment_proof_data && team.payment_proof && team.payment_proof !== 'NOT_PROVIDED') {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/team/${encodeURIComponent(team.team_id)}`);
+                    if (res.ok) {
+                        const fullTeam = await res.json();
+                        if (fullTeam && fullTeam.team && fullTeam.team.payment_proof_data) {
+                            team.payment_proof_data = fullTeam.team.payment_proof_data;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch full team data for proof:", e);
+                }
+            }
 
             let proofUrl = null;
             if (team.payment_proof_data) {
@@ -2087,32 +2117,74 @@
                 }
             }
 
-            document.getElementById('verify-team-id').innerText = team.team_id;
-            document.getElementById('verify-utr').innerText = team.transaction_id || "NOT PROVIDED";
-
-            const imgContainer = document.getElementById('verify-img-container');
             imgContainer.innerHTML = '';
             if (proofUrl) {
-                const img = document.createElement('img');
-                img.src = proofUrl;
-                img.style.maxWidth = "100%";
-                img.style.maxHeight = "420px";
-                img.style.objectFit = "contain";
-                img.style.display = "block";
-                img.style.margin = "0 auto";
-                img.style.borderRadius = "6px";
-                img.style.border = "1.5px solid var(--doom-green)";
-                img.onerror = () => {
-                    imgContainer.innerHTML = `<span style="color:var(--deep-magenta); font-family:var(--font-mono); font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> FILE EXPIRED / NOT FOUND ON DISK</span>`;
-                };
-                imgContainer.appendChild(img);
+                const isPdf = proofUrl.startsWith('data:application/pdf') || (team.payment_proof && team.payment_proof.toLowerCase().endsWith('.pdf'));
+                if (isPdf) {
+                    imgContainer.innerHTML = `
+                        <div style="padding: 20px; text-align: center;">
+                            <i class="fas fa-file-pdf" style="font-size: 3rem; color: #ff3e62; margin-bottom: 12px; display: block;"></i>
+                            <div style="color: #fff; font-family: var(--font-mono); margin-bottom: 12px; font-weight: bold;">PDF PAYMENT RECEIPT ATTACHED</div>
+                            <a href="${proofUrl}" target="_blank" download="${team.team_id}_payment_proof.pdf" class="action-btn-hud action-btn-green" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; text-decoration: none;">
+                                <i class="fas fa-external-link-alt"></i> OPEN / DOWNLOAD PDF
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    const img = document.createElement('img');
+                    img.src = proofUrl;
+                    img.style.maxWidth = "100%";
+                    img.style.maxHeight = "440px";
+                    img.style.objectFit = "contain";
+                    img.style.display = "block";
+                    img.style.margin = "0 auto";
+                    img.style.borderRadius = "6px";
+                    img.style.border = "1.5px solid var(--doom-green)";
+                    img.style.cursor = "zoom-in";
+                    img.title = "Click to inspect in full resolution";
+                    
+                    const openFull = () => {
+                        const win = window.open('');
+                        if (win) {
+                            win.document.write(`<title>Payment Proof - ${team.team_id}</title><body style="margin:0; background:#080b14; display:flex; align-items:center; justify-content:center; min-height:100vh;"><img src="${proofUrl}" style="max-width:98%; max-height:98vh; object-fit:contain; border-radius:4px; box-shadow:0 0 25px rgba(0,255,102,0.4);"></body>`);
+                        }
+                    };
+                    img.onclick = openFull;
+
+                    const controls = document.createElement('div');
+                    controls.style.marginTop = '10px';
+                    controls.style.display = 'flex';
+                    controls.style.gap = '10px';
+                    controls.style.justifyContent = 'center';
+                    controls.innerHTML = `
+                        <button type="button" class="action-btn-hud action-btn-cyan" style="padding: 4px 10px; font-size: 0.78rem;" id="proof-full-btn"><i class="fas fa-expand"></i> FULL RESOLUTION</button>
+                        <a href="${proofUrl}" download="${team.team_id}_payment_proof.jpg" class="action-btn-hud action-btn-green" style="padding: 4px 10px; font-size: 0.78rem; text-decoration:none;"><i class="fas fa-download"></i> DOWNLOAD</a>
+                    `;
+
+                    img.onerror = async () => {
+                        // Fallback attempt: request directly from /api/admin/payment_proof/:teamId
+                        try {
+                            const fallbackUrl = `${API_BASE_URL}/api/admin/payment_proof/${encodeURIComponent(team.team_id)}`;
+                            const testRes = await fetch(fallbackUrl);
+                            if (testRes.ok) {
+                                const blob = await testRes.blob();
+                                const objectUrl = URL.createObjectURL(blob);
+                                img.src = objectUrl;
+                                proofUrl = objectUrl;
+                                return;
+                            }
+                        } catch (e) { }
+                        imgContainer.innerHTML = `<span style="color:var(--deep-magenta); font-family:var(--font-mono); font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> FILE EXPIRED / NOT FOUND ON DISK</span>`;
+                    };
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(controls);
+                    const fullBtn = controls.querySelector('#proof-full-btn');
+                    if (fullBtn) fullBtn.onclick = openFull;
+                }
             } else {
                 imgContainer.innerHTML = `<span style="color:var(--deep-magenta); font-family:var(--font-mono); font-weight:bold;">NO PAYMENT PROOF UPLOADED YET</span>`;
             }
-
-            document.getElementById('verify-modal').style.display = 'flex';
-            document.getElementById('do-verify-btn').onclick = () => performVerification(team.team_id);
-            document.getElementById('do-reject-btn').onclick = () => performReject(team.team_id);
         }
 
         function closeVerifyModal() {
