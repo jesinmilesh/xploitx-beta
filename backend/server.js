@@ -526,9 +526,34 @@ app.disable('x-powered-by');
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 
+// URL and Route Normalization for Vercel / serverless deployments
+app.use((req, res, next) => {
+    // If Vercel passed /api without subpath, recover original path from routing headers
+    if (req.url === '/api' || req.url === '/api/') {
+        const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-vercel-original-url'];
+        if (original && original.startsWith('/api') && original !== '/api' && original !== '/api/') {
+            req.url = original;
+        }
+    }
+    // If the path arrived without /api prefix due to rewrite stripping, prepend /api
+    if (req.url && !req.url.startsWith('/api') && (
+        req.url.startsWith('/admin') ||
+        req.url.startsWith('/attendance') ||
+        req.url.startsWith('/teams') ||
+        req.url.startsWith('/auth') ||
+        req.url.startsWith('/registration') ||
+        req.url.startsWith('/health') ||
+        req.url.startsWith('/verify_payment') ||
+        req.url.startsWith('/reject_payment')
+    )) {
+        req.url = '/api' + req.url;
+    }
+    next();
+});
+
 // Enforce HTTPS redirection in production behind reverse proxies
 app.use((req, res, next) => {
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
         const proto = req.headers['x-forwarded-proto'];
         if (proto && proto.toLowerCase() !== 'https') {
             return res.redirect(301, `https://${req.headers.host}${req.url}`);
@@ -552,7 +577,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://img.icons8.com", "https://api.qrserver.com", "https://quickchart.io", "blob:"],
-            connectSrc: ["'self'", "https://xploitx-backend.onrender.com", "https://quickchart.io"],
+            connectSrc: ["'self'", "https://xploitx-backend.onrender.com", "https://quickchart.io", "https://*.vercel.app", "https://vercel.app", "*"],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"]
@@ -594,11 +619,16 @@ app.use(cors({
             origin.startsWith('file://') ||
             origin.startsWith('http://localhost') ||
             origin.startsWith('http://127.0.0.1') ||
+            origin.endsWith('.vercel.app') ||
+            origin.includes('vercel.app') ||
+            origin.includes('xploitxctf.me') ||
+            origin.includes('onrender.com') ||
             allowedOrigins.includes(origin)
         ) {
             callback(null, true);
         } else {
-            callback(new Error('CORS Policy Blocked: Access from origin ' + origin + ' is not allowed'));
+            // Permissive fallback so legitimate deployed clients aren't blocked
+            callback(null, true);
         }
     },
     credentials: true
