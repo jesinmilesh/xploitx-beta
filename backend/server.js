@@ -566,7 +566,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://use.fontawesome.com"],
             imgSrc: ["'self'", "data:", "https://raw.githubusercontent.com", "https://img.icons8.com", "https://api.qrserver.com", "https://quickchart.io", "blob:"],
-            connectSrc: ["'self'", "https://xploitx-backend.onrender.com", "https://quickchart.io", "https://*.vercel.app", "https://vercel.app", "*"],
+            connectSrc: ["'self'", "https://quickchart.io", "https://*.vercel.app", "https://vercel.app", "*"],
             frameAncestors: ["'none'"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"]
@@ -611,7 +611,6 @@ app.use(cors({
             origin.endsWith('.vercel.app') ||
             origin.includes('vercel.app') ||
             origin.includes('xploitxctf.me') ||
-            origin.includes('onrender.com') ||
             allowedOrigins.includes(origin)
         ) {
             callback(null, true);
@@ -1406,22 +1405,37 @@ async function findTeamByUTR(utr) {
 
 async function getAllTeamsData() {
     if (isDbMongo()) {
-        const teams = await Team.find().lean();
-        const fullData = [];
-        for (const t of teams) {
-            const members = await Member.find({ team_id: t.team_id }).lean();
-            fullData.push({ ...t, id: t._id.toString(), members });
+        const [teams, members] = await Promise.all([
+            Team.find({}, { payment_proof_data: 0 }).lean(),
+            Member.find().lean()
+        ]);
+        const membersMap = new Map();
+        for (const m of members) {
+            const tid = m.team_id;
+            if (!membersMap.has(tid)) membersMap.set(tid, []);
+            membersMap.get(tid).push({ ...m, id: m._id ? m._id.toString() : m.id });
         }
-        return fullData;
+        return teams.map(t => ({
+            ...t,
+            id: t._id ? t._id.toString() : t.id,
+            members: membersMap.get(t.team_id) || []
+        }));
     }
     if (db) {
-        const teams = await db.all(`SELECT * FROM teams`);
-        const fullData = [];
-        for (const team of teams) {
-            const members = await db.all(`SELECT * FROM members WHERE team_db_id = ?`, [team.id]);
-            fullData.push({ ...team, members });
+        const [teams, members] = await Promise.all([
+            db.all(`SELECT id, team_id, name, email, event, day, transaction_id, payment_proof, payment_verified, created_at FROM teams`),
+            db.all(`SELECT * FROM members`)
+        ]);
+        const membersMap = new Map();
+        for (const m of members) {
+            const tid = m.team_db_id;
+            if (!membersMap.has(tid)) membersMap.set(tid, []);
+            membersMap.get(tid).push(m);
         }
-        return fullData;
+        return teams.map(t => ({
+            ...t,
+            members: membersMap.get(t.id) || []
+        }));
     }
     return [];
 }
@@ -3044,15 +3058,22 @@ app.post('/api/admin/verify_payment', verifyAdmin, async (req, res) => {
             const htmlContent = wrapEmailHtml(innerHtml, 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed');
 
             const hasEmailProvider = !!(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY || (process.env.EMAIL_USER && !process.env.EMAIL_USER.includes('your-email')));
-            if (hasEmailProvider) {
-                for (const emailAddr of recipientEmails) {
-                    await sendEmail({ to: emailAddr, subject: 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed', text: textContent, html: htmlContent, attachments });
-                }
-                await logActivity('EMAIL DISPATCHED', `Confirmation email with OD Letter PDF & Entry QR pass dispatched to ${recipientEmails.join(', ')} (Team [${teamId}])`);
+            if (hasEmailProvider && recipientEmails.length > 0) {
+                (async () => {
+                    try {
+                        for (const emailAddr of recipientEmails) {
+                            await sendEmail({ to: emailAddr, subject: 'XploitX 2.0 Beta CTF - Payment Verified & Registration Confirmed', text: textContent, html: htmlContent, attachments });
+                        }
+                        await logActivity('EMAIL DISPATCHED', `Confirmation email with OD Letter PDF & Entry QR pass dispatched to ${recipientEmails.join(', ')} (Team [${teamId}])`);
+                    } catch (emailErr) {
+                        console.error('[Verification Email Delivery Warning]:', emailErr.message);
+                        await logActivity('EMAIL WARNING', `Email delivery to team [${teamId}] encountered an issue: ${emailErr.message}`);
+                    }
+                })();
             }
         }
         await logActivity('STATUS MODIFIED', `Team [${teamId}] ("${teamName}") status changed from "${prevStatus}" ➔ "READY (CONFIRMED)" by Operative "${operative}"`);
-        res.json({ success: true, message: 'Team verified and OD letter sent successfully' });
+        res.json({ success: true, message: 'Team verified and registration confirmed successfully' });
     } catch (e) {
         console.error("Verify Payment Error:", e);
         res.status(500).json({ error: e.message });
@@ -3389,9 +3410,16 @@ app.post('/api/attendance/login', attendanceLoginLimiter, (req, res) => {
             }
         }
 
-        if (!expectedPass && cleanUsername.toLowerCase() === 'admin') {
-            expectedPass = adminAccounts['attendance'];
-            matchedOperative = 'attendance';
+        if (cleanUsername.toLowerCase() === 'admin') {
+            const adminPass = (process.env.ADMIN_PASS_ADMINISTRATOR || '').replace(/^["']|["']$/g, '').trim();
+            const attKey = (process.env.ATTENDANCE_SECURITY_KEY || '').replace(/^["']|["']$/g, '').trim();
+            if (cleanPassword === adminPass || cleanPassword === attKey) {
+                isValid = true;
+                matchedOperative = 'Administrator';
+            } else {
+                expectedPass = adminAccounts['attendance'] || adminAccounts['Administrator'];
+                matchedOperative = 'attendance';
+            }
         }
 
         if (expectedPass && typeof expectedPass === 'string') {
@@ -3615,6 +3643,61 @@ app.post('/api/attendance/mark_members', verifyAttendanceAuth, async (req, res) 
     }
 });
 
+app.post('/api/attendance/toggle_member', verifyAttendanceAuth, async (req, res) => {
+    const { teamId, memberId, memberName, newStatus } = req.body;
+    try {
+        const targetStatus = newStatus === 'PRESENT' ? 'PRESENT' : 'ABSENT';
+        const now = new Date();
+        const entryTime = targetStatus === 'PRESENT' ? now : null;
+
+        if (isDbMongo()) {
+            let updated = false;
+            if (memberId && typeof memberId === 'string' && /^[0-9a-fA-F]{24}$/.test(memberId)) {
+                const r = await Member.updateOne(
+                    { _id: memberId },
+                    { $set: { attendance_status: targetStatus, entry_time: entryTime } }
+                );
+                if (r.matchedCount > 0) updated = true;
+            }
+            if (!updated && (memberName || memberId)) {
+                await Member.updateOne(
+                    { team_id: teamId, name: memberName || memberId },
+                    { $set: { attendance_status: targetStatus, entry_time: entryTime } }
+                );
+            }
+            const presentCount = await Member.countDocuments({ team_id: teamId, attendance_status: 'PRESENT' });
+            const overallStatus = presentCount > 0 ? 'PRESENT' : 'ABSENT';
+            await Attendance.updateOne(
+                { team_id: teamId },
+                { $set: { status: overallStatus, ...(presentCount > 0 ? { entry_time: now } : {}) } },
+                { upsert: true }
+            );
+        } else if (db) {
+            if (memberId && !isNaN(parseInt(memberId))) {
+                await db.run(
+                    `UPDATE members SET attendance_status = ?, entry_time = ? WHERE id = ?`,
+                    [targetStatus, entryTime ? entryTime.toISOString() : null, memberId]
+                );
+            } else {
+                await db.run(
+                    `UPDATE members SET attendance_status = ?, entry_time = ? WHERE team_db_id = (SELECT id FROM teams WHERE team_id = ?) AND name = ?`,
+                    [targetStatus, entryTime ? entryTime.toISOString() : null, teamId, memberName || memberId]
+                );
+            }
+            const row = await db.get(`SELECT COUNT(*) as c FROM members WHERE team_db_id = (SELECT id FROM teams WHERE team_id = ?) AND attendance_status = 'PRESENT'`, [teamId]);
+            const overallStatus = (row && row.c > 0) ? 'PRESENT' : 'ABSENT';
+            await db.run(`UPDATE attendance SET status = ?, entry_time = ? WHERE team_id = ?`, [overallStatus, overallStatus === 'PRESENT' ? now.toISOString() : null, teamId]);
+        }
+
+        const operative = req.user ? req.user.username : 'Attendance Officer';
+        await logActivity('ATTENDANCE TOGGLE', `Member [${memberName || memberId}] (Team ${teamId}) status set to "${targetStatus}" by ${operative}`);
+
+        res.json({ success: true, status: targetStatus, entry_time: entryTime });
+    } catch (e) {
+        console.error('[Toggle Member Error]:', e);
+        res.status(500).json({ error: 'Failed to update member attendance' });
+    }
+});
 
 app.get('/api/attendance/all', verifyAttendanceAuth, async (req, res) => {
     try {

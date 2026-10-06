@@ -1472,7 +1472,7 @@
 
     <script>
 
-        let API_BASE_URL = '';
+        let API_BASE_URL = (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL) ? window.API_BASE_URL : '';
         const hostname = window.location.hostname;
         const protocol = window.location.protocol;
         const port = window.location.port;
@@ -1697,10 +1697,6 @@
                 resetInactivityTimer();
 
                 if (authenticatedUser === 'Administrator') {
-
-
-
-
                     const statsCont = document.getElementById('admin-stats-container');
                     if (statsCont) statsCont.style.display = 'none';
                     const ctrlCont = document.getElementById('admin-controls-container');
@@ -1733,10 +1729,6 @@
                     if (window.adminActivityInterval) clearInterval(window.adminActivityInterval);
                     window.adminActivityInterval = setInterval(loadAdminActivityLogs, 3000);
                 } else {
-
-
-
-
                     const statsCont = document.getElementById('admin-stats-container');
                     if (statsCont) statsCont.style.display = 'grid';
                     const ctrlCont = document.getElementById('admin-controls-container');
@@ -2373,13 +2365,13 @@
 
         function performVerification(teamId) {
             showCustomConfirm(
-                "Are you sure you want to VERIFY payment?\nThis will CONFIRM registration and automatically send the OD Letter PDF and QR Code email.",
+                "Are you sure you want to VERIFY payment?\nThis will CONFIRM registration and generate the OD Letter PDF and QR Code entry pass.",
                 async () => {
                     const btn = document.getElementById('do-verify-btn');
-                    let orig = "VERIFY & MAIL";
+                    let orig = "VERIFY PAYMENT";
                     if (btn) {
                         orig = btn.innerHTML;
-                        btn.innerHTML = "VERIFYING...";
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFYING...';
                         btn.disabled = true;
                     }
 
@@ -2389,17 +2381,17 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ teamId })
                         });
-                        const data = await res.json();
+                        const data = await res.json().catch(() => ({}));
 
-                        if (data.success) {
-                            showCustomAlert(data.message || "Team verified and OD letter sent successfully.");
+                        if (res.ok && data.success) {
+                            showCustomAlert(data.message || "Team verified and registration confirmed successfully.");
                             closeVerifyModal();
                             loadData();
                         } else {
-                            showCustomAlert("ERROR: " + data.error);
+                            showCustomAlert("ERROR: " + (data.error || "Failed to verify team."));
                         }
                     } catch (e) {
-                        showCustomAlert("Network Error");
+                        showCustomAlert("Network Error: " + e.message);
                     } finally {
                         if (btn) {
                             btn.innerHTML = orig;
@@ -2407,7 +2399,7 @@
                         }
                     }
                 },
-                "CONFIRM & SEND"
+                "CONFIRM & VERIFY"
             );
         }
 
